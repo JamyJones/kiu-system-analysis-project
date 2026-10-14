@@ -1,6 +1,10 @@
 import React, { useState, useRef } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-const JOB_URL = "https://paddleocr.aistudio-app.com/api/v2/ocr/jobs";
+// Replace this with your proxy URL (no trailing slash), e.g. "https://youruser.pythonanywhere.com"
+const PROXY_BASE = "https://john4650.pythonanywhere.com/ocr";
+const JOB_URL = `${PROXY_BASE}/jobs`;
+const FETCH_ENDPOINT = `${PROXY_BASE}/fetch?url=`;
 
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -13,15 +17,16 @@ function downloadBlob(blob, filename) {
   URL.revokeObjectURL(url);
 }
 
-async function fetchAsBlobUrl(url) {
-  const resp = await fetch(url);
+async function fetchAsBlobUrl(proxyBaseFetchUrl, url) {
+  // Use the proxy fetch endpoint to avoid CORS issues
+  const proxyUrl = `${proxyBaseFetchUrl}${encodeURIComponent(url)}`;
+  const resp = await fetch(proxyUrl);
   if (!resp.ok) throw new Error(`Failed to fetch ${url}: ${resp.status}`);
   const blob = await resp.blob();
   return { blob, url: URL.createObjectURL(blob) };
 }
 
 export default function App() {
-  const [token, setToken] = useState("");
   const [isUrlMode, setIsUrlMode] = useState(true);
   const [fileUrl, setFileUrl] = useState("");
   const [file, setFile] = useState(null);
@@ -46,16 +51,9 @@ export default function App() {
     setResults([]);
     setJobId(null);
 
-    if (!token) {
-      appendLog("Provide an Authorization token.");
-      setStatus("error");
-      return;
-    }
-
     try {
       appendLog("Submitting job...");
       let resp;
-      const headers = { Authorization: `bearer ${token}` };
 
       const optionalPayload = {
         useDocOrientationClassify,
@@ -74,10 +72,9 @@ export default function App() {
           model,
           optionalPayload,
         };
-        headers["Content-Type"] = "application/json";
         resp = await fetch(JOB_URL, {
           method: "POST",
-          headers,
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
         });
       } else {
@@ -92,7 +89,7 @@ export default function App() {
         form.append("optionalPayload", JSON.stringify(optionalPayload));
         resp = await fetch(JOB_URL, {
           method: "POST",
-          headers: { Authorization: `bearer ${token}` }, // don't set Content-Type for FormData
+          // Do NOT set Content-Type for FormData; browser will set it including boundary
           body: form,
         });
       }
@@ -116,14 +113,14 @@ export default function App() {
       appendLog(`Job submitted successfully. job id: ${jid}`);
       setJobId(jid);
       setStatus("polling");
-      pollJob(jid, headers);
+      pollJob(jid);
     } catch (err) {
       appendLog("Submit error: " + err.message);
       setStatus("error");
     }
   }
 
-  async function pollJob(jid, headers) {
+  async function pollJob(jid) {
     if (pollingRef.current) {
       clearTimeout(pollingRef.current);
       pollingRef.current = null;
@@ -133,7 +130,6 @@ export default function App() {
       try {
         const resp = await fetch(`${JOB_URL}/${jid}`, {
           method: "GET",
-          headers: headers,
         });
         if (!resp.ok) {
           appendLog(`Job status fetch failed: ${resp.status}`);
@@ -194,7 +190,9 @@ export default function App() {
 
   async function fetchJsonlAndProcess(jsonlUrl) {
     try {
-      const resp = await fetch(jsonlUrl);
+      // Fetch JSONL via proxy to avoid CORS
+      const proxyJsonlUrl = `${FETCH_ENDPOINT}${encodeURIComponent(jsonlUrl)}`;
+      const resp = await fetch(proxyJsonlUrl);
       if (!resp.ok) {
         appendLog(`Failed to download JSONL: ${resp.status}`);
         return;
@@ -223,7 +221,7 @@ export default function App() {
           const imgs = [];
           for (const [imgPath, imgUrl] of Object.entries(markdownImages)) {
             try {
-              const { blob, url } = await fetchAsBlobUrl(imgUrl);
+              const { blob, url } = await fetchAsBlobUrl(FETCH_ENDPOINT, imgUrl);
               imgs.push({ name: imgPath, url: imgUrl, blob, blobUrl: url });
             } catch (err) {
               appendLog(`Failed to fetch markdown image ${imgUrl}: ${err.message}`);
@@ -234,7 +232,7 @@ export default function App() {
           const outImgs = [];
           for (const [imgName, imgUrl] of Object.entries(outputImages)) {
             try {
-              const { blob, url } = await fetchAsBlobUrl(imgUrl);
+              const { blob, url } = await fetchAsBlobUrl(FETCH_ENDPOINT, imgUrl);
               outImgs.push({ name: imgName, url: imgUrl, blob, blobUrl: url });
             } catch (err) {
               appendLog(`Failed to fetch output image ${imgUrl}: ${err.message}`);
@@ -272,6 +270,7 @@ export default function App() {
     if (img.blob) {
       downloadBlob(img.blob, img.name.replace(/\//g, "_"));
     } else if (img.url) {
+      // fallback: open url in new tab (may be blocked by CORS if direct)
       window.open(img.url, "_blank");
     }
   }
@@ -283,13 +282,9 @@ export default function App() {
       <div className="card mb-3">
         <div className="card-body">
           <div className="mb-3">
-            <label className="form-label">Authorization Token</label>
-            <input
-              className="form-control"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Paste token here (consider using a proxy server in production)"
-            />
+            <div className="alert alert-secondary">
+              Token is provided server-side by your proxy. Set PROXY_BASE at the top of this file to your proxy origin.
+            </div>
           </div>
 
           <div className="mb-3 form-check form-switch">
@@ -489,8 +484,9 @@ export default function App() {
       <div className="alert alert-info mt-3">
         Notes:
         <ul>
-          <li>This runs entirely in the browser. If the API does not allow cross-origin requests, the calls will fail — use a server-side proxy in that case.</li>
-          <li>Do not store long-lived secrets (token) in a public client app — prefer a backend proxy that adds Authorization header securely.</li>
+          <li>This app now expects a server-side proxy to handle Authorization and CORS.</li>
+          <li>Set PROXY_BASE at the top of src/App.js to your proxy origin (e.g. https://youruser.pythonanywhere.com).</li>
+          <li>Ensure your proxy exposes: POST /api/jobs, GET /api/jobs/:jobId, GET /api/fetch?url=...</li>
         </ul>
       </div>
     </div>
