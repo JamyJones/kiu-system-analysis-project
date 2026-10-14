@@ -1,11 +1,5 @@
 import React from "react";
-import { createRoot } from "react-dom/client";#!/usr/bin/env bash
-set -e
-echo "Installing dependencies..."
-npm ci
-echo "Building production bundle..."
-npm run build
-echo "Build finished at ./build"
+import { createRoot } from "react-dom/client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import App from "./App";
 
