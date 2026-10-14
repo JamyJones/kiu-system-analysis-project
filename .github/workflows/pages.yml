@@ -27,6 +27,8 @@ jobs:
       - name: Install dependencies and build
         run: bash build.sh
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
       - name: Upload artifact for GitHub Pages
         id: upload-artifact
         uses: actions/upload-pages-artifact@v3
@@ -52,4 +54,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 #
+        uses: actions/deploy-pages@v5 #
