@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 pip install flask
-pip install flask-cor
+pip install flask-cors
 pip install gunicorn
 set -e
 echo "Installing dependencies..."
