@@ -12,7 +12,7 @@ echo "Build finished at ./build"
 
 mkdir template
 
-cp ./build/index.html template/
+mv ./build/index.html template/
 sed -i 's|\./static|/static|g' template/index.html
 
 cp -r ./build/static .
