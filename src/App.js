@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // Replace this with your proxy URL (no trailing slash), e.g. "https://youruser.pythonanywhere.com"
-const PROXY_BASE = "";
+const PROXY_BASE = "/ocr";
 const JOB_URL = `${PROXY_BASE}/jobs`;
 const FETCH_ENDPOINT = `${PROXY_BASE}/fetch?url=`;
 
