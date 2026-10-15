@@ -10,10 +10,10 @@ echo "Building production bundle..."
 npm run build
 echo "Build finished at ./build"
 
-mkdir template
+mkdir templates
 
-mv ./build/index.html template/
-sed -i 's|\./static|/static|g' template/index.html
+mv ./build/index.html templates/
+sed -i 's|\./static|/static|g' templates/index.html
 
 cp -r ./build/static .
 
