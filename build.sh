@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 pip install flask
 pip install flask-ocr
+pip install gunicorn
 set -e
 echo "Installing dependencies..."
 npm install
