@@ -27,6 +27,3 @@ def job_status_route(job_id):
 def fetch_url_route():
     return fetch_url(request)
 
-if __name__ == "__main__":
-    app.env = "development"
-    app.run(port=8080, debug=True)

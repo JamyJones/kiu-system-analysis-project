@@ -14,3 +14,4 @@ cp ./build/index.html template/
 sed -i 's|\./static|/static|g' template/index.html
 
 cp -r ./build/static .
+
