@@ -243,7 +243,7 @@ export default function App() {
           outResults.push({
             markdownText,
             markdownFilename: mdFilename,
-            mdBlob,
+            markdownBlob:mdBlob,
             markdownBlobUrl: mdBlobUrl,
             images: imgs,
             outputImages: outImgs,
