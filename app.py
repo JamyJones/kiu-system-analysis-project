@@ -3,12 +3,15 @@ from flask import (
     Response,
     request,
     jsonify,
-    render_template
+    render_template,
+    make_response
 )
 from flask_cors import CORS
 from utils.ocr import submit_job, job_status, fetch_url
 
-from utils.pandoc import render_to_html
+# updated pandoc utilities
+from utils.pandoc import render_to_html, convert_md
+
 app = Flask(__name__)
 CORS(app)
 
@@ -28,7 +31,16 @@ def job_status_route(job_id):
 def fetch_url_route():
     return fetch_url(request)
 
+# backward-compatible pandoc -> HTML endpoint
 @app.route("/ocr/pandoc", methods=["POST"])
 def md_to_html():
     html = render_to_html(request)
     return jsonify({"html":html})
+
+# new convert endpoint used by frontend: accepts { mdText, format }
+@app.route("/ocr/convert", methods=["POST"])
+def md_convert_route():
+    return convert_md(request)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
