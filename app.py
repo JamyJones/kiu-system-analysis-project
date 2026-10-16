@@ -8,6 +8,7 @@ from flask import (
 from flask_cors import CORS
 from utils.ocr import submit_job, job_status, fetch_url
 
+from utils.pandoc import render_to_html
 app = Flask(__name__)
 CORS(app)
 
