@@ -5,8 +5,7 @@ def render_to_html(req):
     md = data.get("mdText", "")
     # Call pandoc directly and pass markdown via stdin to avoid shell-escaping limits
     res = subprocess.run(
-        ["pandoc", "-f", "markdown", "-t", "html"],
-        input=md,
+        ["./run_pandoc",md],
         capture_output=True,
         text=True,
         check=True,
