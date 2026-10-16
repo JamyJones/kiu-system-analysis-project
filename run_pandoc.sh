@@ -1,4 +1,4 @@
 #!/bin/bash
 
-echo "$1" | pandoc -f markdown --pdf-engine=xelatex -t html
+echo "$1" | pandoc -f markdown --mathml -t html5
 
