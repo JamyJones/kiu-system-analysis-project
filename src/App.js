@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // Replace this with your proxy URL (no trailing slash), e.g. "https://youruser.pythonanywhere.com"
@@ -7,13 +7,22 @@ const JOB_URL = `${ROUTE_BASE}/jobs`;
 const FETCH_ENDPOINT = `${ROUTE_BASE}/fetch?url=`;
 
 async function renderMdPandoc(md){
-  const data ={mdText:md}
-  const resp = fetch(`${ROUTE_BASE}/pandoc`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        })
-  return await resp.json()["html"]
+  try {
+    const data ={mdText:md}
+    const resp = await fetch(`${ROUTE_BASE}/pandoc`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`Pandoc render failed: ${resp.status} ${txt}`);
+    }
+    const json = await resp.json();
+    return json?.html ?? "";
+  } catch (err) {
+    return `<pre style=\"color:red\">Error rendering markdown: ${String(err.message)}</pre>`;
+  }
 }
 
 function downloadBlob(blob, filename) {
@@ -50,6 +59,12 @@ export default function App() {
   const [jobId, setJobId] = useState(null);
   const [results, setResults] = useState([]);
   const pollingRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearTimeout(pollingRef.current);
+    };
+  }, []);
 
   function appendLog(msg) {
     setLog((prev) => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
@@ -257,6 +272,7 @@ export default function App() {
             markdownBlobUrl: mdBlobUrl,
             images: imgs,
             outputImages: outImgs,
+            markdownHtml: null,
           });
 
           appendLog(`Processed page ${pageNum}`);
@@ -265,6 +281,19 @@ export default function App() {
       }
 
       setResults(outResults);
+
+      // Render markdown -> HTML for each result (async, update as each completes)
+      outResults.forEach((item, idx) => {
+        renderMdPandoc(item.markdownText).then((html) => {
+          setResults((prev) => {
+            const copy = prev.slice();
+            if (!copy[idx]) return prev; // guard
+            copy[idx] = { ...copy[idx], markdownHtml: html };
+            return copy;
+          });
+        });
+      });
+
       appendLog("All results processed.");
     } catch (err) {
       appendLog("Result fetch/process error: " + err.message);
@@ -428,7 +457,8 @@ export default function App() {
                     <div>
                       <strong>{r.markdownFilename}</strong>
                       <div style={{ whiteSpace: "pre-wrap", border: "1px solid #eee", padding: 8, marginTop: 6 }}>
-                        {renderMdPandoc(r.markdownText)}
+                        {/* Render converted HTML (or a rendering placeholder) */}
+                        <div dangerouslySetInnerHTML={{ __html: r.markdownHtml ?? "<em>Rendering...</em>" }} />
                       </div>
                     </div>
                   </div>
