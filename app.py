@@ -27,3 +27,7 @@ def job_status_route(job_id):
 def fetch_url_route():
     return fetch_url(request)
 
+@app.route("/ocr/pandoc", methods=["POST"])
+def md_to_html():
+    html = render_to_html(request)
+    return jsonify({"html":html})

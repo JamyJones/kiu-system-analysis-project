@@ -3,6 +3,7 @@ pip install flask
 pip install flask-cors
 pip install gunicorn
 pip install requests
+pip install pandoc
 set -e
 echo "Installing dependencies..."
 npm install

@@ -2,9 +2,19 @@ import React, { useState, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // Replace this with your proxy URL (no trailing slash), e.g. "https://youruser.pythonanywhere.com"
-const PROXY_BASE = "/ocr";
-const JOB_URL = `${PROXY_BASE}/jobs`;
-const FETCH_ENDPOINT = `${PROXY_BASE}/fetch?url=`;
+const ROUTE_BASE = "/ocr";
+const JOB_URL = `${ROUTE_BASE}/jobs`;
+const FETCH_ENDPOINT = `${ROUTE_BASE}/fetch?url=`;
+
+async function renderMdPandoc(md){
+  const data ={mdText:md}
+  const resp = fetch(`${ROUTE_BASE}/pandoc`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+  return await resp.json()["html"]
+}
 
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
@@ -283,7 +293,7 @@ export default function App() {
         <div className="card-body">
           <div className="mb-3">
             <div className="alert alert-secondary">
-              Token is provided server-side by your proxy. Set PROXY_BASE at the top of this file to your proxy origin.
+              Token is provided server-side by your proxy. Set ROUTE_BASE at the top of this file to your proxy origin.
             </div>
           </div>
 
@@ -418,14 +428,8 @@ export default function App() {
                     <div>
                       <strong>{r.markdownFilename}</strong>
                       <div style={{ whiteSpace: "pre-wrap", border: "1px solid #eee", padding: 8, marginTop: 6 }}>
-                        {r.markdownText.slice(0, 200)}
-                        {r.markdownText.length > 200 ? "..." : ""}
+                        {renderMdPandoc(r.markdownText)}
                       </div>
-                    </div>
-                    <div className="text-end">
-                      <button className="btn btn-sm btn-outline-primary mb-2" onClick={() => handleDownloadMarkdown(r)}>
-                        Download Markdown
-                      </button>
                     </div>
                   </div>
 
@@ -485,7 +489,7 @@ export default function App() {
         Notes:
         <ul>
           <li>This app now expects a server-side proxy to handle Authorization and CORS.</li>
-          <li>Set PROXY_BASE at the top of src/App.js to your proxy origin (e.g. https://youruser.pythonanywhere.com).</li>
+          <li>Set ROUTE_BASE at the top of src/App.js to your proxy origin (e.g. https://youruser.pythonanywhere.com).</li>
           <li>Ensure your proxy exposes: POST /api/jobs, GET /api/jobs/:jobId, GET /api/fetch?url=...</li>
         </ul>
       </div>
