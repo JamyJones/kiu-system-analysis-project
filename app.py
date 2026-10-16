@@ -42,5 +42,3 @@ def md_to_html():
 def md_convert_route():
     return convert_md(request)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -4,6 +4,8 @@ pip install flask-cors
 pip install gunicorn
 pip install requests
 pip install pandoc
+pip install pdflatex
+
 set -e
 echo "Installing dependencies..."
 npm install
