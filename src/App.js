@@ -54,7 +54,6 @@ export default function App() {
   const [useDocUnwarping, setUseDocUnwarping] = useState(false);
   const [useChartRecognition, setUseChartRecognition] = useState(false);
 
-  const [log, setLog] = useState([]);
   const [status, setStatus] = useState(null);
   const [jobId, setJobId] = useState(null);
   const [results, setResults] = useState([]);
@@ -66,18 +65,18 @@ export default function App() {
     };
   }, []);
 
-  function appendLog(msg) {
-    setLog((prev) => [...prev, `${new Date().toLocaleTimeString()} - ${msg}`]);
+  function log(msg) {
+    // Keep UI clean: use console.log
+    console.log(`${new Date().toLocaleTimeString()} - ${msg}`);
   }
 
   async function submitJob() {
-    setLog([]);
     setStatus("submitting");
     setResults([]);
     setJobId(null);
 
     try {
-      appendLog("Submitting job...");
+      log("Submitting job...");
       let resp;
 
       const optionalPayload = {
@@ -88,7 +87,7 @@ export default function App() {
 
       if (isUrlMode) {
         if (!fileUrl) {
-          appendLog("Provide a file URL.");
+          log("Provide a file URL.");
           setStatus("error");
           return;
         }
@@ -104,7 +103,7 @@ export default function App() {
         });
       } else {
         if (!file) {
-          appendLog("Select a local file to upload.");
+          log("Select a local file to upload.");
           setStatus("error");
           return;
         }
@@ -119,10 +118,10 @@ export default function App() {
         });
       }
 
-      appendLog(`Response status: ${resp.status}`);
+      log(`Response status: ${resp.status}`);
       if (!resp.ok) {
         const txt = await resp.text();
-        appendLog(`Response content: ${txt}`);
+        log(`Response content: ${txt}`);
         setStatus("error");
         return;
       }
@@ -130,17 +129,17 @@ export default function App() {
       const data = await resp.json();
       const jid = data?.data?.jobId;
       if (!jid) {
-        appendLog("No jobId received in response.");
+        log("No jobId received in response.");
         setStatus("error");
         return;
       }
 
-      appendLog(`Job submitted successfully. job id: ${jid}`);
+      log(`Job submitted successfully. job id: ${jid}`);
       setJobId(jid);
       setStatus("polling");
       pollJob(jid);
     } catch (err) {
-      appendLog("Submit error: " + err.message);
+      log("Submit error: " + err.message);
       setStatus("error");
     }
   }
@@ -157,55 +156,55 @@ export default function App() {
           method: "GET",
         });
         if (!resp.ok) {
-          appendLog(`Job status fetch failed: ${resp.status}`);
+          log(`Job status fetch failed: ${resp.status}`);
           setStatus("error");
           return;
         }
         const j = await resp.json();
         const state = j?.data?.state;
         if (!state) {
-          appendLog("Unexpected job status payload.");
+          log("Unexpected job status payload.");
           setStatus("error");
           return;
         }
 
         if (state === "pending") {
-          appendLog("The current status of the job is pending");
+          log("The current status of the job is pending");
           pollingRef.current = setTimeout(pollOnce, 5000);
         } else if (state === "running") {
           try {
             const prog = j?.data?.extractProgress || {};
             const totalPages = prog.totalPages;
             const extractedPages = prog.extractedPages;
-            appendLog(
+            log(
               `Running: total pages: ${totalPages ?? "?"}, extracted: ${extractedPages ?? "?"}`
             );
           } catch {
-            appendLog("The current status of the job is running...");
+            log("The current status of the job is running...");
           }
           pollingRef.current = setTimeout(pollOnce, 5000);
         } else if (state === "done") {
-          appendLog("Job completed.");
+          log("Job completed.");
           const jsonlUrl = j?.data?.resultUrl?.jsonUrl;
           if (jsonlUrl) {
-            appendLog(`Result JSONL url: ${jsonlUrl}`);
+            log(`Result JSONL url: ${jsonlUrl}`);
             setStatus("fetching-result");
             await fetchJsonlAndProcess(jsonlUrl);
             setStatus("done");
           } else {
-            appendLog("Done but no result URL found.");
+            log("Done but no result URL found.");
             setStatus("error");
           }
         } else if (state === "failed") {
           const errMsg = j?.data?.errorMsg || "unknown";
-          appendLog(`Job failed: ${errMsg}`);
+          log(`Job failed: ${errMsg}`);
           setStatus("failed");
         } else {
-          appendLog(`Unknown state: ${state}`);
+          log(`Unknown state: ${state}`);
           setStatus("error");
         }
       } catch (err) {
-        appendLog("Polling error: " + err.message);
+        log("Polling error: " + err.message);
         setStatus("error");
       }
     };
@@ -219,7 +218,7 @@ export default function App() {
       const proxyJsonlUrl = `${FETCH_ENDPOINT}${encodeURIComponent(jsonlUrl)}`;
       const resp = await fetch(proxyJsonlUrl);
       if (!resp.ok) {
-        appendLog(`Failed to download JSONL: ${resp.status}`);
+        log(`Failed to download JSONL: ${resp.status}`);
         return;
       }
       const text = await resp.text();
@@ -249,7 +248,7 @@ export default function App() {
               const { blob, url } = await fetchAsBlobUrl(FETCH_ENDPOINT, imgUrl);
               imgs.push({ name: imgPath, url: imgUrl, blob, blobUrl: url });
             } catch (err) {
-              appendLog(`Failed to fetch markdown image ${imgUrl}: ${err.message}`);
+              log(`Failed to fetch markdown image ${imgUrl}: ${err.message}`);
               imgs.push({ name: imgPath, url: imgUrl, blob: null, blobUrl: null });
             }
           }
@@ -260,7 +259,7 @@ export default function App() {
               const { blob, url } = await fetchAsBlobUrl(FETCH_ENDPOINT, imgUrl);
               outImgs.push({ name: imgName, url: imgUrl, blob, blobUrl: url });
             } catch (err) {
-              appendLog(`Failed to fetch output image ${imgUrl}: ${err.message}`);
+              log(`Failed to fetch output image ${imgUrl}: ${err.message}`);
               outImgs.push({ name: imgName, url: imgUrl, blob: null, blobUrl: null });
             }
           }
@@ -275,7 +274,7 @@ export default function App() {
             markdownHtml: null,
           });
 
-          appendLog(`Processed page ${pageNum}`);
+          log(`Processed page ${pageNum}`);
           pageNum += 1;
         }
       }
@@ -294,9 +293,9 @@ export default function App() {
         });
       });
 
-      appendLog("All results processed.");
+      log("All results processed.");
     } catch (err) {
-      appendLog("Result fetch/process error: " + err.message);
+      log("Result fetch/process error: " + err.message);
     }
   }
 
@@ -314,131 +313,254 @@ export default function App() {
     }
   }
 
+  function isTopLevelTable(html) {
+    if (!html) return false;
+    const trimmed = html.trim().toLowerCase();
+    return /^<\s*table\b/.test(trimmed);
+  }
+
+  async function handleConvert(item, format) {
+    try {
+      setStatus(`converting-${format}`);
+      const body = { mdText: item.markdownText, format };
+      const resp = await fetch(`${ROUTE_BASE}/convert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        log(`Conversion failed: ${resp.status} ${txt}`);
+        setStatus("error");
+        return;
+      }
+
+      const blob = await resp.blob();
+      // determine extension
+      let ext = format;
+      if (format === "xlsx") ext = "xlsx";
+      if (format === "docx") ext = "docx";
+      if (format === "pdf") ext = "pdf";
+      const filename = item.markdownFilename.replace(/\.md$/, `.${ext}`);
+      downloadBlob(blob, filename);
+      setStatus("done");
+    } catch (err) {
+      log(`Conversion error: ${err.message}`);
+      setStatus("error");
+    }
+  }
+
   return (
-    <div className="container my-4">
-      <h3>PaddleOCR Job UI (React + Bootstrap)</h3>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#f0f6ff 0%, #ffffff 100%)', paddingTop: 20 }}>
+      <div className="container my-4">
+        <h3 style={{ marginBottom: 12 }}>PaddleOCR Job UI</h3>
 
-      <div className="card mb-3">
-        <div className="card-body">
-          <div className="mb-3">
-            <div className="alert alert-secondary">
-              Token is provided server-side by your proxy. Set ROUTE_BASE at the top of this file to your proxy origin.
+        <div className="card mb-3 shadow-sm">
+          <div className="card-body">
+            <div className="mb-3 form-check form-switch">
+              <input
+                id="modeSwitch"
+                className="form-check-input"
+                type="checkbox"
+                checked={isUrlMode}
+                onChange={(e) => setIsUrlMode(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="modeSwitch">
+                URL Mode (toggle off for local file)
+              </label>
             </div>
-          </div>
 
-          <div className="mb-3 form-check form-switch">
-            <input
-              id="modeSwitch"
-              className="form-check-input"
-              type="checkbox"
-              checked={isUrlMode}
-              onChange={(e) => setIsUrlMode(e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="modeSwitch">
-              URL Mode (toggle off for local file)
-            </label>
-          </div>
+            {isUrlMode ? (
+              <div className="mb-3">
+                <label className="form-label">File URL</label>
+                <input
+                  className="form-control"
+                  value={fileUrl}
+                  onChange={(e) => setFileUrl(e.target.value)}
+                  placeholder="https://..."
+                />
+              </div>
+            ) : (
+              <div className="mb-3">
+                <label className="form-label">Select File</label>
+                <input
+                  className="form-control"
+                  type="file"
+                  onChange={(e) => setFile(e.target.files[0])}
+                />
+              </div>
+            )}
 
-          {isUrlMode ? (
             <div className="mb-3">
-              <label className="form-label">File URL</label>
-              <input
-                className="form-control"
-                value={fileUrl}
-                onChange={(e) => setFileUrl(e.target.value)}
-                placeholder="https://..."
-              />
+              <label className="form-label">Model</label>
+              <input className="form-control" value={model} onChange={(e) => setModel(e.target.value)} />
             </div>
-          ) : (
+
             <div className="mb-3">
-              <label className="form-label">Select File</label>
-              <input
-                className="form-control"
-                type="file"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  id="orient"
+                  type="checkbox"
+                  checked={useDocOrientationClassify}
+                  onChange={(e) => setUseDocOrientationClassify(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="orient">
+                  useDocOrientationClassify
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  id="unwarp"
+                  type="checkbox"
+                  checked={useDocUnwarping}
+                  onChange={(e) => setUseDocUnwarping(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="unwarp">
+                  useDocUnwarping
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  id="chart"
+                  type="checkbox"
+                  checked={useChartRecognition}
+                  onChange={(e) => setUseChartRecognition(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="chart">
+                  useChartRecognition
+                </label>
+              </div>
             </div>
-          )}
 
-          <div className="mb-3">
-            <label className="form-label">Model</label>
-            <input className="form-control" value={model} onChange={(e) => setModel(e.target.value)} />
-          </div>
+            <div className="d-flex gap-2">
+              <button className="btn btn-primary" onClick={submitJob} disabled={status === "submitting" || status === "polling"}>
+                Submit Job
+              </button>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => {
+                  setStatus(null);
+                }}
+              >
+                Reset
+              </button>
+            </div>
 
-          <div className="mb-3">
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                id="orient"
-                type="checkbox"
-                checked={useDocOrientationClassify}
-                onChange={(e) => setUseDocOrientationClassify(e.target.checked)}
-              />
-              <label className="form-check-label" htmlFor="orient">
-                useDocOrientationClassify
-              </label>
+            <div className="mt-3">
+              {(status === 'submitting' || status === 'polling' || status === 'fetching-result' || (status && status.startsWith('converting'))) && (
+                <div className="d-flex align-items-center gap-2 mt-2">
+                  <div className="spinner-border text-primary" role="status" style={{ width: 20, height: 20 }}>
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
+                  <div style={{flex:1}}>
+                    <div className="progress" style={{height:8}}>
+                      <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={{width: '40%'}} />
+                    </div>
+                    <small className="text-muted">{status}</small>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                id="unwarp"
-                type="checkbox"
-                checked={useDocUnwarping}
-                onChange={(e) => setUseDocUnwarping(e.target.checked)}
-              />
-              <label className="form-check-label" htmlFor="unwarp">
-                useDocUnwarping
-              </label>
-            </div>
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                id="chart"
-                type="checkbox"
-                checked={useChartRecognition}
-                onChange={(e) => setUseChartRecognition(e.target.checked)}
-              />
-              <label className="form-check-label" htmlFor="chart">
-                useChartRecognition
-              </label>
-            </div>
-          </div>
 
-          <div className="d-flex gap-2">
-            <button className="btn btn-primary" onClick={submitJob} disabled={status === "submitting" || status === "polling"}>
-              Submit Job
-            </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                setLog([]);
-                setStatus(null);
-              }}
-            >
-              Clear Log
-            </button>
           </div>
         </div>
-      </div>
 
-      <div className="row">
-        <div className="col-md-6">
-          <h5>Status</h5>
-          <div className="card mb-3">
-            <div className="card-body" style={{ maxHeight: 300, overflow: "auto" }}>
-              <p>
-                <strong>Current:</strong> {status ?? "idle"}
-              </p>
-              {jobId && (
+        <div className="row">
+          <div className="col-md-6">
+            <h5>Status</h5>
+            <div className="card mb-3">
+              <div className="card-body" style={{ maxHeight: 300, overflow: "auto" }}>
                 <p>
-                  <strong>JobId:</strong> {jobId}
+                  <strong>Current:</strong> {status ?? "idle"}
                 </p>
-              )}
-              <hr />
-              <div>
-                {log.map((l, idx) => (
-                  <div key={idx} style={{ fontFamily: "monospace", fontSize: 12 }}>
-                    {l}
+                {jobId && (
+                  <p>
+                    <strong>JobId:</strong> {jobId}
+                  </p>
+                )}
+                <hr />
+                <div>
+                  <small className="text-muted">Console logs are available in the browser developer console.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="col-md-6">
+            <h5>Results</h5>
+            <div className="card mb-3">
+              <div className="card-body" style={{ maxHeight: 300, overflow: "auto" }}>
+                {results.length === 0 && <div>No results yet.</div>}
+                {results.map((r, idx) => (
+                  <div key={idx} className="mb-3">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <strong>{r.markdownFilename}</strong>
+                        <div style={{ whiteSpace: "pre-wrap", border: "1px solid #eee", padding: 8, marginTop: 6 }}>
+                          {/* Render converted HTML (or a rendering placeholder) */}
+                          <div dangerouslySetInnerHTML={{ __html: r.markdownHtml ?? "<em>Rendering...</em>" }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 d-flex gap-2">
+                      <button className="btn btn-sm btn-outline-primary" onClick={() => handleDownloadMarkdown(r)}>Download MD</button>
+                      <button className="btn btn-sm btn-outline-success" onClick={() => handleConvert(r, 'html')}>Download HTML</button>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => handleConvert(r, 'docx')}>Download DOCX</button>
+                      <button className="btn btn-sm btn-outline-secondary" onClick={() => handleConvert(r, 'pdf')}>Download PDF</button>
+                      {isTopLevelTable(r.markdownHtml) && (
+                        <button className="btn btn-sm btn-outline-warning" onClick={() => handleConvert(r, 'xlsx')}>Download Excel</button>
+                      )}
+                    </div>
+
+                    {r.images.length > 0 && (
+                      <div className="mt-2">
+                        <strong>Markdown images</strong>
+                        <div className="d-flex gap-2 flex-wrap mt-1">
+                          {r.images.map((img, i) => (
+                            <div key={i} style={{ width: 140 }}>
+                              {img.blobUrl ? (
+                                <img src={img.blobUrl} alt={img.name} style={{ width: "100%", height: "80px", objectFit: "cover" }} />
+                              ) : (
+                                <div style={{ width: "100%", height: 80, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  No preview
+                                </div>
+                              )}
+                              <div className="d-flex justify-content-between mt-1">
+                                <small className="text-muted text-truncate" style={{ width: "60%" }}>{img.name}</small>
+                                <button className="btn btn-sm btn-outline-secondary" onClick={() => handleDownloadImage(img)}>DL</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {r.outputImages.length > 0 && (
+                      <div className="mt-2">
+                        <strong>Output images</strong>
+                        <div className="d-flex gap-2 flex-wrap mt-1">
+                          {r.outputImages.map((img, i) => (
+                            <div key={i} style={{ width: 140 }}>
+                              {img.blobUrl ? (
+                                <img src={img.blobUrl} alt={img.name} style={{ width: "100%", height: "80px", objectFit: "cover" }} />
+                              ) : (
+                                <div style={{ width: "100%", height: 80, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  No preview
+                                </div>
+                              )}
+                              <div className="d-flex justify-content-between mt-1">
+                                <small className="text-muted text-truncate" style={{ width: "60%" }}>{img.name}</small>
+                                <button className="btn btn-sm btn-outline-secondary" onClick={() => handleDownloadImage(img)}>DL</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -446,82 +568,6 @@ export default function App() {
           </div>
         </div>
 
-        <div className="col-md-6">
-          <h5>Results</h5>
-          <div className="card mb-3">
-            <div className="card-body" style={{ maxHeight: 300, overflow: "auto" }}>
-              {results.length === 0 && <div>No results yet.</div>}
-              {results.map((r, idx) => (
-                <div key={idx} className="mb-3">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <strong>{r.markdownFilename}</strong>
-                      <div style={{ whiteSpace: "pre-wrap", border: "1px solid #eee", padding: 8, marginTop: 6 }}>
-                        {/* Render converted HTML (or a rendering placeholder) */}
-                        <div dangerouslySetInnerHTML={{ __html: r.markdownHtml ?? "<em>Rendering...</em>" }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {r.images.length > 0 && (
-                    <div className="mt-2">
-                      <strong>Markdown images</strong>
-                      <div className="d-flex gap-2 flex-wrap mt-1">
-                        {r.images.map((img, i) => (
-                          <div key={i} style={{ width: 140 }}>
-                            {img.blobUrl ? (
-                              <img src={img.blobUrl} alt={img.name} style={{ width: "100%", height: "80px", objectFit: "cover" }} />
-                            ) : (
-                              <div style={{ width: "100%", height: 80, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                No preview
-                              </div>
-                            )}
-                            <div className="d-flex justify-content-between mt-1">
-                              <small className="text-muted text-truncate" style={{ width: "60%" }}>{img.name}</small>
-                              <button className="btn btn-sm btn-outline-secondary" onClick={() => handleDownloadImage(img)}>DL</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {r.outputImages.length > 0 && (
-                    <div className="mt-2">
-                      <strong>Output images</strong>
-                      <div className="d-flex gap-2 flex-wrap mt-1">
-                        {r.outputImages.map((img, i) => (
-                          <div key={i} style={{ width: 140 }}>
-                            {img.blobUrl ? (
-                              <img src={img.blobUrl} alt={img.name} style={{ width: "100%", height: "80px", objectFit: "cover" }} />
-                            ) : (
-                              <div style={{ width: "100%", height: 80, background: "#eee", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                No preview
-                              </div>
-                            )}
-                            <div className="d-flex justify-content-between mt-1">
-                              <small className="text-muted text-truncate" style={{ width: "60%" }}>{img.name}</small>
-                              <button className="btn btn-sm btn-outline-secondary" onClick={() => handleDownloadImage(img)}>DL</button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="alert alert-info mt-3">
-        Notes:
-        <ul>
-          <li>This app now expects a server-side proxy to handle Authorization and CORS.</li>
-          <li>Set ROUTE_BASE at the top of src/App.js to your proxy origin (e.g. https://youruser.pythonanywhere.com).</li>
-          <li>Ensure your proxy exposes: POST /api/jobs, GET /api/jobs/:jobId, GET /api/fetch?url=...</li>
-        </ul>
       </div>
     </div>
   );
