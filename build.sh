@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt-get install texlive-latex-base
+echo 'y' | apt-get install texlive-latex-base
 
 pip install flask
 pip install flask-cors
