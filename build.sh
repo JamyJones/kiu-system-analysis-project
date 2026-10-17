@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+sudo apt-get install texlive-latex-base
+
 pip install flask
 pip install flask-cors
 pip install gunicorn
