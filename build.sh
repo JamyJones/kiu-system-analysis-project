@@ -1,14 +1,4 @@
 #!/usr/bin/env bash
-
-echo 'y' | apt-get install texlive-latex-base
-
-pip install flask
-pip install flask-cors
-pip install gunicorn
-pip install requests
-pip install pandoc
-pip install pdflatex
-
 set -e
 echo "Installing dependencies..."
 npm install
