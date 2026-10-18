@@ -8,6 +8,8 @@
 #   ./run_pandoc.sh pdf  /tmp/out.pdf
 # Note: pandoc must be installed and available on PATH. PDF output requires a working LaTeX toolchain.
 pip install pandoc
+pip install pdflatex
+sudo apt-get install -y texlive-latex-base
 FORMAT="$1"
 OUTFILE="$2"
 
