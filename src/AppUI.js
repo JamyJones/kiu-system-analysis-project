@@ -210,7 +210,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
         </div>
 
         {showAbout && <div className="backdrop-blur" onClick={() => setShowAbout(false)} />}
-        <div className={`offcanvas ${showAbout ? 'show' : ''}`} role="dialog" aria-modal={showAbout} style={{ position: 'relative', padding: 12 }}>
+        <div className={`offcanvas ${showAbout ? 'show' : ''}`} role="dialog" aria-modal={showAbout} style={{ padding: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4>About</h4>
             <button className="icon-btn" onClick={() => setShowAbout(false)} onMouseDown={addRipple}>
@@ -225,7 +225,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
         </div>
 
         {/* Status banner placed between the topbar and the main glass card */}
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '6px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '100px 0 30px' }}>
           <div className="status-row" style={{ padding: '8px 12px', borderRadius: 12, background: 'var(--card)', boxShadow: '0 6px 18px rgba(2,6,23,0.06)' }}>
             <div className="spinner-wheel" aria-hidden>
               <FontAwesomeIcon icon={faGear} className={processing ? 'spin' : ''} />
