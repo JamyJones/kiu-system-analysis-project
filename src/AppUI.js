@@ -115,13 +115,15 @@ h1.title span{ display:block }
 .dark .ripple{ background:rgba(255,255,255,0.12); }
 @keyframes rippleAnim{ to{ transform:scale(1); opacity:0; } }
 
-.glass-panel{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.46)); border-radius:16px; border:1px solid rgba(255,255,255,0.6); box-shadow:0 10px 30px rgba(16,24,40,[...] }
+.glass-panel{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.46)); border-radius:16px; border:1px solid rgba(255,255,255,0.6); box-shadow:0 10px 30px rgba(16,24,40,0.08); }
 .dark .glass-panel{ background: linear-gradient(180deg, rgba(10,20,30,0.6), rgba(8,12,20,0.46)); border:1px solid rgba(255,255,255,0.04); box-shadow:0 14px 40px rgba(2,6,23,0.6); }
 
 .backdrop-blur{ position:fixed; inset:0; z-index:1600; background:rgba(2,6,23,0.35); backdrop-filter:blur(6px); }
-.offcanvas{ position:fixed; left:0; top:0; width:320px; max-width:92%; height:100%; background:var(--card); color:var(--text); box-shadow:0 12px 40px rgba(2,6,23,0.12); transform:translateX(-112%[...]
+.offcanvas{ position:fixed; left:0; top:0; width:320px; max-width:92%; height:100%; background:var(--card); color:var(--text); box-shadow:0 12px 40px rgba(2,6,23,0.12); transform:translateX(-112%); z-index:1601; border-right:1px solid rgba(15,23,42,0.06); }
+.dark .offcanvas{ border-right:1px solid rgba(255,255,255,0.04); box-shadow:0 12px 40px rgba(0,0,0,0.6); }
 .offcanvas.show{ transform:translateX(0%); }
-.offcanvas-right{ position:fixed; right:12px; top:80px; width:min(330px, calc(100vw - 24px)); background:var(--card); box-shadow:0 14px 36px rgba(0,0,0,0.18); border-radius:12px; padding:12px; z-[...]
+.offcanvas-right{ position:fixed; right:12px; top:80px; width:min(330px, calc(100vw - 24px)); background:var(--card); box-shadow:0 14px 36px rgba(0,0,0,0.18); border-radius:12px; padding:12px; z-index:1601; display:none; border:1px solid rgba(15,23,42,0.06); }
+.dark .offcanvas-right{ border:1px solid rgba(255,255,255,0.04); box-shadow:0 14px 36px rgba(0,0,0,0.28); }
 .offcanvas-right.show{ display:block; }
 
 .nav-tabs{ display:flex; gap:10px; padding:8px; background:transparent; border-bottom:none; }
@@ -137,11 +139,11 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
 .centered-col{ display:flex; flex-direction:column; align-items:center }
 .form-control[readonly]{ background:transparent; border:1px dashed rgba(0,0,0,0.06); color:var(--text) }
 
-.material-btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:12px 18px; border-radius:12px; border:none; cursor:pointer; color:white; background:var(--submit-[...]
+.material-btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:12px 18px; border-radius:12px; border:none; cursor:pointer; color:white; background:var(--submit-grad); }
 .material-btn.outline{ background:transparent; color:var(--text); border:1px solid rgba(15,23,42,0.06); box-shadow:none }
 .material-btn:active{ transform:translateY(2px) scale(.995) }
 
-.camera-btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; background:rgba(2,6,23,0.06); border:none; color:var(--text); position:relative; overflow:hid[...]
+.camera-btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; background:rgba(2,6,23,0.06); border:none; color:var(--text); position:relative; overflow:hidden }
 
 .status-row{ display:flex; align-items:center; gap:12px }
 .muted{ color:var(--muted) }
@@ -161,7 +163,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
 .star{ position:absolute; width:3px; height:3px; border-radius:50%; background:white; opacity:0.9; animation: twinkle 3s infinite }
 @keyframes twinkle{ 0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2} }
 
-.upload-native{ display:inline-flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.9); box-shadow:0 6px 14px rgba(2,6,23,0.06); color:var(--te[...]
+.upload-native{ display:inline-flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.9); box-shadow:0 6px 14px rgba(2,6,23,0.06); color:var(--text); }
 .dark .upload-native{ background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04) }
 
 @media (max-width:640px){ h1.title{ font-size:2.1rem } .nav-tabs .nav-link{ padding:10px 6px; font-size:14px } }
@@ -215,7 +217,9 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
               <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
-          <p style={{ color: 'var(--muted)' }}>This UI submits images or documents to an OCR backend. Capture from camera on mobile, or upload files. After processing you can download results as Markd[...]
+          <p style={{ color: 'var(--muted)', marginTop: 8 }}>
+            This UI submits images or documents to an OCR backend. Capture from camera on mobile, or upload files. After processing you can download results as Markdown or other formats.
+          </p>
           <hr />
           <p style={{ fontSize: 13, color: 'var(--muted)' }}>Endpoints: /ocr/jobs, /ocr/fetch, /ocr/convert, /ocr/pandoc</p>
         </div>
