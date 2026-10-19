@@ -11,6 +11,7 @@ import {
   faDownload,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 export default function AppUI({ logic }){
   const {
@@ -148,10 +149,6 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
 .status-row{ display:flex; align-items:center; gap:12px }
 .muted{ color:var(--muted) }
 
-.spinner-wheel{ width:26px; height:26px; display:inline-block }
-.spin{ animation: spin 1s linear infinite }
-@keyframes spin{ to{ transform:rotate(360deg) } }
-
 .download-stack{ display:flex; flex-direction:column; gap:10px; align-items:center }
 .thumb{ width:84px; height:84px; object-fit:cover; border-radius:10px; border:1px solid rgba(0,0,0,0.06) }
 .file-chip{ display:inline-flex; gap:8px; align-items:center; padding:8px 10px; border-radius:999px; background:rgba(15,23,42,0.04); color:var(--text) }
@@ -227,9 +224,11 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
         {/* Status banner placed between the topbar and the main glass card */}
         <div style={{ display: 'flex', justifyContent: 'center', margin: '100px 0 30px' }}>
           <div className="status-row" style={{ padding: '8px 12px', borderRadius: 12, background: 'var(--card)', boxShadow: '0 6px 18px rgba(2,6,23,0.06)' }}>
-            <div className="spinner-wheel" aria-hidden>
-              <FontAwesomeIcon icon={faGear} className={processing ? 'spin' : ''} />
-            </div>
+              <DotLottieReact
+                src={processing?"https://lottie.host/c7afde75-9220-4a2c-b72e-eb299ccae7a9/l3YHcUMIuv.lottie":"https://lottie.host/7c767a57-299c-47e8-a8bd-07ddff508490/lOCk4SAhXW.lottie"}
+                loop
+                autoplay
+              />
             <div>
               <div style={{ fontWeight: 800, color: 'var(--muted)' }}>{status ?? 'idle'}</div>
               {jobId && <div style={{ fontSize: 12, color: 'var(--muted)' }}>Job: {jobId}</div>}
