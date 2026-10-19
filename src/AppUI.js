@@ -24,6 +24,7 @@ export default function AppUI({ logic }){
     dark, setDark, showFireworks, showAbout, setShowAbout,
     pollingRef, cameraInputRef, fileInputRef,
     submitJob, handleDownloadMarkdown, handleConvert, isTopLevelTable,
+    aboutHTML
   } = logic;
 
   const [showModelSettings, setShowModelSettings] = useState(false);
@@ -220,11 +221,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
               <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
-          <p style={{ color: 'var(--muted)', marginTop: 8 }}>
-            This UI submits images or documents to an OCR backend. Capture from camera on mobile, or upload files. After processing you can download results as Markdown or other formats.
-          </p>
-          <hr />
-          <p style={{ fontSize: 13, color: 'var(--muted)' }}>Endpoints: /ocr/jobs, /ocr/fetch, /ocr/convert, /ocr/pandoc</p>
+          <div dangerouslySetInnerHTML={{ __html: aboutHTML }} style={{ color: 'var(--muted)', marginTop: 8 }} />
         </div>
 
         {/* Status banner placed between the topbar and the main glass card */}

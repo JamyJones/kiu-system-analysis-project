@@ -24,6 +24,21 @@ async function renderMdPandoc(md){
   }
 }
 
+async function getAboutHTML(){
+  try {
+    const resp = await fetch(`${ROUTE_BASE}/about`);
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`failed to get information about the project due to error: ${resp.status} ${txt}`);
+    }
+    const json = await resp.json();
+    return json?.html ?? "";
+  } catch (err) {
+    return `<pre style="color:red">Error getting information about this project: ${String(err.message)}</pre>`;
+  }
+}
+
+
 function downloadBlob(blob, filename){
   const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
@@ -43,12 +58,18 @@ export default function useAppLogic(){
   const [dark, setDark] = useState(()=>{ try{return localStorage.getItem('ui-dark')==='1'}catch{return false} });
   const [showFireworks, setShowFireworks] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [aboutHTML,setAboutHTML]=useState("about")
 
   const pollingRef = useRef(null);
   const cameraInputRef = useRef(null);
   const fileInputRef = useRef(null);
 
   useEffect(()=>{ try{ localStorage.setItem('ui-dark', dark ? '1' : '0'); }catch{} }, [dark]);
+
+  useEffect(()=>{
+    const _about = getAboutHTML()
+    _about.then(i=>i).then(data=>setAboutHTML(data))
+  },[aboutHTML])
 
   useEffect(()=>{ if(showFireworks){ const t = setTimeout(()=>setShowFireworks(false), 3800); return ()=>clearTimeout(t);} }, [showFireworks]);
 
@@ -188,5 +209,7 @@ export default function useAppLogic(){
 
     // misc
     models,
+    //about project
+    aboutHTML
   };
 }

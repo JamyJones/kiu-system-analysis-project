@@ -42,3 +42,7 @@ def md_to_html():
 def md_convert_route():
     return convert_md(request)
 
+@app.route("/ocr/about", methods=["GET"])
+def get_about_info():
+    data = requests.get("https://raw.githubusercontent.com/JamyJones/kiu-system-analysis-project/refs/heads/main/README.md")
+    return jsonify({"html":data.text})
