@@ -47,7 +47,19 @@ export default function App() {
   const [jobId, setJobId] = useState(null);
   const [results, setResults] = useState([]);
   const [activeTab, setActiveTab] = useState("input");
+  const [dark, setDark] = useState(() => {
+    try {
+      return localStorage.getItem('ui-dark') === '1';
+    } catch { return false }
+  });
+  const [showFireworks, setShowFireworks] = useState(false);
+
   const pollingRef = useRef(null);
+  const cameraInputRef = useRef(null);
+
+  useEffect(() => {
+    try { localStorage.setItem('ui-dark', dark ? '1' : '0'); } catch {}
+  }, [dark]);
 
   useEffect(() => {
     return () => {
@@ -55,11 +67,19 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (showFireworks) {
+      const t = setTimeout(() => setShowFireworks(false), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [showFireworks]);
+
   function log(msg) {
     console.log(`${new Date().toLocaleTimeString()} - ${msg}`);
   }
 
   function showUserMessage(message) {
+    // Friendly mobile-first UX: use alert for now
     window.alert(message);
   }
 
@@ -98,7 +118,7 @@ export default function App() {
       if (!resp.ok) {
         const txt = await resp.text();
         log(`Response content: ${txt}`);
-        showUserMessage(`Submit failed: ${resp.status}. See console for details.`);
+        showUserMessage(`Submit failed: ${resp.status}.`);
         setStatus(null);
         return;
       }
@@ -174,6 +194,7 @@ export default function App() {
             setStatus("fetching-result");
             await fetchJsonlAndProcess(jsonlUrl);
             setStatus("done");
+            setShowFireworks(true);
             showUserMessage("Results ready.");
             setActiveTab("results");
           } else {
@@ -310,29 +331,86 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #eef5ff 0%, #f6f9ff 35%, #eef8f5 100%)', color: '#1f2937', fontFamily: "Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" }}>
+    <div className={dark ? 'app-root dark' : 'app-root'}>
       <style>{`
-        .app-container { padding-top: 20px; }
-        .card { border-radius: 14px; border: 1px solid rgba(148,163,184,0.25); background: rgba(255,255,255,0.88); }
-        .nav-tabs .nav-link { color: #334155; }
-        .nav-tabs .nav-link.active { background: linear-gradient(90deg,#edf4ff,#ffffff); border-color: #dfeafc; color: #0f172a; }
-        .tab-panel { min-height: 420px; }
-        .download-stack { display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; }
-        .download-btn { min-width: 220px; border-radius: 12px; transition: transform .18s ease, box-shadow .18s ease; }
-        .download-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08); }
-        .download-btn:active { transform: scale(.98); }
+        :root{
+          --bg: #e8f0ff; /* light background solid */
+          --card: #ffffff;
+          --text: #0f172a;
+          --muted: #475569;
+          --accent: #2563eb; /* blue */
+          --accent-2: #06b6d4;
+          --tab-bg: #f1f5f9;
+          --tab-active: linear-gradient(90deg,#60a5fa,#7dd3fc);
+          --material-shadow: 0 6px 18px rgba(15,23,42,0.12);
+        }
+        .dark{
+          --bg: #0f172a; /* solid dark */
+          --card: rgba(255,255,255,0.03);
+          --text: #e6eef8;
+          --muted: #94a3b8;
+          --accent: #60a5fa;
+          --accent-2: #38bdf8;
+          --tab-bg: rgba(255,255,255,0.02);
+          --tab-active: linear-gradient(90deg,#0ea5e9,#7c3aed);
+          --material-shadow: 0 8px 30px rgba(2,6,23,0.6);
+        }
+
+        .app-root{ min-height:100vh; background:var(--bg); color:var(--text); font-family: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; padding:18px; }
+        .container-mobile{ max-width:900px; margin:0 auto; }
+        h3.title { text-align:center; font-family: 'Segoe Script', 'Bradley Hand', 'Segoe UI', cursive; font-size:1.6rem; margin-bottom:12px; }
+
+        .card { border-radius:14px; border: none; background: var(--card); box-shadow: var(--material-shadow); }
+        .nav-tabs{ display:flex; gap:6px; padding:8px; background:transparent; border-bottom:none; }
+        .nav-tabs .nav-item{ flex:1; }
+        .nav-tabs .nav-link{ display:flex; align-items:center; justify-content:center; padding:10px 6px; border-radius:10px; background:var(--tab-bg); color:var(--text); border:none; font-weight:600; }
+        .nav-tabs .nav-link.active{ background: var(--tab-active); color:#04263a; box-shadow: 0 6px 20px rgba(2,6,23,0.08); }
+
+        .tab-panel{ padding:8px 6px; }
+        .form-control[readonly]{ background:transparent; border:1px dashed rgba(0,0,0,0.06); }
+
+        .material-btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; border-radius:12px; border:none; cursor:pointer; box-shadow: 0 6px 14px rgba(2,6,23,0.08); transition: transform .12s ease, box-shadow .12s ease, opacity .12s; background: linear-gradient(180deg, #fff 0%, #f8fbff 100%); }
+        .material-btn:active{ transform: translateY(2px) scale(.995); box-shadow: 0 4px 10px rgba(2,6,23,0.06); }
+        .material-btn.primary{ background: linear-gradient(90deg,var(--accent),var(--accent-2)); color: white; }
+        .material-btn.outline{ background:transparent; border:1px solid rgba(15,23,42,0.06); }
+
+        .download-btn{ min-width: 220px; border-radius: 12px; }
         .shake { animation: shake 0.4s; }
         @keyframes shake { 0%{ transform: translateX(0);} 25%{ transform: translateX(-6px);} 50%{ transform: translateX(6px);} 75%{ transform: translateX(-4px);} 100%{ transform: translateX(0);} }
-        .centered { display:flex; align-items:center; justify-content:center; }
-        .result-card { max-height: 60vh; overflow:auto; }
-        .status-row { display:flex; align-items:center; gap: 12px; }
-        .muted { color:#475569; }
+
+        .camera-btn{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background: rgba(2,6,23,0.06); border:none; }
+
+        .status-chip{ display:inline-block; padding:8px 10px; background: rgba(2,6,23,0.04); border-radius:999px; font-weight:600; }
+
+        /* fireworks */
+        .fireworks-wrap{ pointer-events:none; position:fixed; left:0; top:0; width:100%; height:100%; z-index:9999; overflow:hidden; }
+        .firework{ position:absolute; width:12px; height:12px; border-radius:50%; opacity:0; transform:scale(0); }
+
       `}</style>
 
-      <div className="container app-container">
-        <h3 style={{ marginBottom: 12, color: '#0f172a' }}>PaddleOCR Job UI</h3>
+      {showFireworks && (
+        <div className="fireworks-wrap">
+          {/* create many bursts positioned randomly */}
+          {Array.from({length:12}).map((_,i)=>{
+            const left = Math.random()*100;
+            const top = Math.random()*60 + 10;
+            const clr = ['#f97316','#fb7185','#60a5fa','#34d399','#f43f5e','#e879f9'][Math.floor(Math.random()*6)];
+            const delay = Math.random()*0.8;
+            const duration = 1 + Math.random()*1.2;
+            const style = { left:`${left}%`, top:`${top}%`, background:clr, animation:`fw ${duration}s ${delay}s ease-out forwards` };
+            return <span key={i} className="firework" style={style}></span>;
+          })}
 
-        <div className="card mb-3 shadow-sm">
+          <style>{`
+            @keyframes fw{ 0%{ opacity:1; transform:scale(0); } 60%{ opacity:1; transform:scale(1.6); } 100%{ opacity:0; transform:scale(2.6) translateY(-60px); } }
+          `}</style>
+        </div>
+      )}
+
+      <div className="container-mobile">
+        <h3 className="title">handwritting digitiser</h3>
+
+        <div className="card mb-3">
           <div className="card-body">
             <ul className="nav nav-tabs mb-3" role="tablist">
               <li className="nav-item">
@@ -350,7 +428,7 @@ export default function App() {
               {activeTab === 'input' && (
                 <div>
                   <div className="mb-3">
-                    <label className="form-label" style={{ color: '#334155' }}>Select File</label>
+                    <label className="form-label" style={{ color: 'var(--text)' }}>Select File</label>
                     <input
                       className="form-control"
                       type="file"
@@ -358,9 +436,26 @@ export default function App() {
                     />
                   </div>
 
+                  <div className="mb-3 d-flex gap-2" style={{ alignItems:'center' }}>
+                    <input ref={cameraInputRef} style={{display:'none'}} accept="image/*" capture="environment" id="cameraInput" type="file" onChange={(e)=> setFile(e.target.files[0])} />
+                    <button className="camera-btn" onClick={()=> cameraInputRef.current && cameraInputRef.current.click()} aria-label="Capture from camera">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 7h-3.2l-1.4-1.8A2 2 0 0013.8 4H10.2a2 2 0 00-1.6.8L7.2 7H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      Capture
+                    </button>
+
+                    <div style={{ flex:1 }} />
+
+                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                      <label style={{ fontSize:12, color:'var(--muted)' }}>Dark</label>
+                      <div style={{ display:'inline-flex', alignItems:'center', gap:8 }}>
+                        <input id="darkToggle" type="checkbox" checked={dark} onChange={(e)=> setDark(e.target.checked)} />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="mb-3">
-                    <label className="form-label" style={{ color: '#334155' }}>Model</label>
-                    <input className="form-control" value={model} onChange={(e) => setModel(e.target.value)} />
+                    <label className="form-label" style={{ color: 'var(--text)' }}>Model</label>
+                    <input className="form-control" value={model} onChange={(e) => setModel(e.target.value)} readOnly />
                   </div>
 
                   <div className="mb-3">
@@ -372,7 +467,7 @@ export default function App() {
                         checked={useDocOrientationClassify}
                         onChange={(e) => setUseDocOrientationClassify(e.target.checked)}
                       />
-                      <label className="form-check-label" htmlFor="orient" style={{ color: '#334155' }}>
+                      <label className="form-check-label" htmlFor="orient" style={{ color: 'var(--text)' }}>
                         useDocOrientationClassify
                       </label>
                     </div>
@@ -384,7 +479,7 @@ export default function App() {
                         checked={useDocUnwarping}
                         onChange={(e) => setUseDocUnwarping(e.target.checked)}
                       />
-                      <label className="form-check-label" htmlFor="unwarp" style={{ color: '#334155' }}>
+                      <label className="form-check-label" htmlFor="unwarp" style={{ color: 'var(--text)' }}>
                         useDocUnwarping
                       </label>
                     </div>
@@ -396,18 +491,18 @@ export default function App() {
                         checked={useChartRecognition}
                         onChange={(e) => setUseChartRecognition(e.target.checked)}
                       />
-                      <label className="form-check-label" htmlFor="chart" style={{ color: '#334155' }}>
+                      <label className="form-check-label" htmlFor="chart" style={{ color: 'var(--text)' }}>
                         useChartRecognition
                       </label>
                     </div>
                   </div>
 
-                  <div className="d-flex gap-2">
-                    <button className="btn btn-primary" onClick={submitJob} disabled={status === "submitting" || status === "polling"}>
+                  <div className="d-flex gap-2" style={{ marginBottom:12 }}>
+                    <button className="material-btn primary" onClick={submitJob} disabled={status === "submitting" || status === "polling"}>
                       Submit Job
                     </button>
                     <button
-                      className="btn btn-outline-secondary"
+                      className="material-btn outline"
                       onClick={() => {
                         setStatus(null);
                         setFile(null);
@@ -420,35 +515,36 @@ export default function App() {
                     </button>
                   </div>
 
-                  <div className="mt-3">
-                    {status && (status === 'submitting' || status.startsWith('pending') || status.startsWith('running') || status === 'fetching-result' || status.startsWith('converting')) ? (
-                      <div className="status-row mt-2">
-                        <div className="spinner-border text-primary" role="status" style={{ width: 20, height: 20 }}>
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
-                        <div>
-                          <small className="text-muted">{status}</small>
-                        </div>
+                  <div className="mb-2">
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                      <div>
+                        <small className="muted">Status:</small>
+                        <div style={{ marginTop:6 }}><span className="status-chip">{status ?? 'idle'}</span></div>
                       </div>
-                    ) : null}
+
+                      <div style={{ textAlign:'right' }}>
+                        {jobId && (<div style={{ color: 'var(--muted)' }}><strong>JobId:</strong> {jobId}</div>)}
+                      </div>
+                    </div>
                   </div>
+
                 </div>
               )}
 
               {activeTab === 'results' && (
                 <div>
                   <div className="mb-3">
-                    <h6 style={{ marginBottom: 8, color: '#0f172a' }}>Current status: <span className="muted">{status ?? 'idle'}</span></h6>
-                    {jobId && (<div style={{ color: '#334155' }}><strong>JobId:</strong> {jobId}</div>)}
+                    <h6 style={{ marginBottom: 8, color: 'var(--text)' }}>Current status: <span style={{ color:'var(--muted)' }}>{status ?? 'idle'}</span></h6>
+                    {jobId && (<div style={{ color: 'var(--muted)' }}><strong>JobId:</strong> {jobId}</div>)}
                   </div>
 
                   <div className="card result-card">
                     <div className="card-body">
-                      {results.length === 0 && <div style={{ color: '#475569' }}>No results yet.</div>}
+                      {results.length === 0 && <div style={{ color: 'var(--muted)' }}>No results yet.</div>}
                       {results.map((r, idx) => (
                         <div key={idx} className="mb-3">
-                          <strong style={{ color: '#0f172a' }}>{r.markdownFilename}</strong>
-                          <div style={{ whiteSpace: "pre-wrap", padding: 8, marginTop: 6, color: '#1f2937' }}>
+                          <strong style={{ color: 'var(--text)' }}>{r.markdownFilename}</strong>
+                          <div style={{ whiteSpace: "pre-wrap", padding: 8, marginTop: 6, color: 'var(--text)' }}>
                             <div dangerouslySetInnerHTML={{ __html: r.markdownHtml ?? "<em>Rendering...</em>" }} />
                           </div>
                         </div>
@@ -461,26 +557,26 @@ export default function App() {
               {activeTab === 'downloads' && (
                 <div className="centered" style={{ padding: 18 }}>
                   <div className="download-stack">
-                    {results.length === 0 && <div style={{ color: '#475569' }}>No results to download.</div>}
+                    {results.length === 0 && <div style={{ color: 'var(--muted)' }}>No results to download.</div>}
                     {results.map((r, idx) => (
                       <div key={idx} style={{ width: '100%', display:'flex', flexDirection:'column', alignItems:'center', gap: 12 }}>
-                        <div style={{ fontWeight: 600, color: '#0f172a' }}>{r.markdownFilename}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text)' }}>{r.markdownFilename}</div>
                         <div className="d-flex flex-column align-items-center" style={{ width: '100%', gap: 10 }}>
-                          <button className="btn btn-outline-primary download-btn" onClick={(e) => handleConvert(r, 'html', e)}>
+                          <button className="material-btn outline download-btn" onClick={(e) => handleConvert(r, 'html', e)}>
                             Download HTML
                           </button>
-                          <button className="btn btn-outline-secondary download-btn" onClick={(e) => handleConvert(r, 'docx', e)}>
+                          <button className="material-btn outline download-btn" onClick={(e) => handleConvert(r, 'docx', e)}>
                             Download DOCX
                           </button>
-                          <button className="btn btn-outline-danger download-btn" onClick={(e) => handleConvert(r, 'pdf', e)}>
+                          <button className="material-btn outline download-btn" onClick={(e) => handleConvert(r, 'pdf', e)}>
                             Download PDF
                           </button>
                           {isTopLevelTable(r.markdownHtml) && (
-                            <button className="btn btn-outline-warning download-btn" onClick={(e) => handleConvert(r, 'xlsx', e)}>
+                            <button className="material-btn outline download-btn" onClick={(e) => handleConvert(r, 'xlsx', e)}>
                               Download Excel
                             </button>
                           )}
-                          <button className="btn btn-outline-success download-btn" onClick={() => handleDownloadMarkdown(r)}>
+                          <button className="material-btn primary download-btn" onClick={() => handleDownloadMarkdown(r)}>
                             Download Markdown
                           </button>
                         </div>
@@ -489,41 +585,15 @@ export default function App() {
                   </div>
                 </div>
               )}
+
             </div>
           </div>
         </div>
 
-        <div className="row">
-          <div className="col-md-6">
-            <h5 style={{ color: '#0f172a' }}>Status</h5>
-            <div className="card mb-3">
-              <div className="card-body" style={{ maxHeight: 200, overflow: "auto", color: '#1f2937' }}>
-                <p><strong>Current:</strong> {status ?? "idle"}</p>
-                {jobId && <p><strong>JobId:</strong> {jobId}</p>}
-                <hr />
-                <div><small className="text-muted">Console logs are available in the browser developer console.</small></div>
-              </div>
-            </div>
-          </div>
+        {/* Removed old bottom status/result preview to improve mobile-first layout */}
 
-          <div className="col-md-6">
-            <h5 style={{ color: '#0f172a' }}>Results preview</h5>
-            <div className="card mb-3">
-              <div className="card-body" style={{ maxHeight: 200, overflow: "auto", color: '#1f2937' }}>
-                {results.length === 0 && <div style={{ color: '#475569' }}>No results yet.</div>}
-                {results.map((r, idx) => (
-                  <div key={idx} className="mb-3">
-                    <strong>{r.markdownFilename}</strong>
-                    <div style={{ whiteSpace: "pre-wrap", padding: 8, marginTop: 6 }}>
-                      <div dangerouslySetInnerHTML={{ __html: r.markdownHtml ?? "<em>Rendering...</em>" }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
+
     </div>
   );
 }
