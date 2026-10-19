@@ -56,6 +56,7 @@ export default function App() {
 
   const pollingRef = useRef(null);
   const cameraInputRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     try { localStorage.setItem('ui-dark', dark ? '1' : '0'); } catch {}
@@ -254,6 +255,20 @@ export default function App() {
 
   const models = ["PaddleOCR-VL-1.6", "PaddleOCR-Card-1.0", "PaddleOCR-Table-1.2"];
 
+  function addRipple(e) {
+    const btn = e.currentTarget;
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height) * 1.2;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(()=> { ripple.remove(); }, 600);
+  }
+
   return (
     <div className={dark ? 'app-root dark' : 'app-root'}>
       <style>{`
@@ -292,18 +307,30 @@ export default function App() {
 
         .container-mobile{ max-width:920px; margin:0 auto; position:relative; z-index:1; }
 
-        h1.title { text-align:center; font-family: 'Segoe Script', 'Bradley Hand', 'Segoe UI', cursive; font-size:2.6rem; line-height:1; margin:6px 0 14px; font-weight:700; text-transform:capitalize; }
+        h1.title { text-align:center; font-family: 'Segoe Script', 'Bradley Hand', 'Segoe UI', cursive; font-size:2.6rem; line-height:1; margin:6px 0 14px; font-weight:800; text-transform:capitalize; }
         h1.title span { display:block; }
 
         .topbar{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
         .top-left{ display:flex; align-items:center; gap:10px; }
-        .icon-btn{ background:transparent; border:none; color:var(--text); padding:8px; border-radius:10px; cursor:pointer; }
+        .icon-btn{ background:transparent; border:none; color:var(--text); padding:8px; border-radius:10px; cursor:pointer; position:relative; overflow:hidden; }
         .icon-btn:active{ transform:translateY(1px); }
 
+        /* ripple */
+        .ripple{ position:absolute; border-radius:50%; transform:scale(0); opacity:0.7; pointer-events:none; animation: rippleAnim .6s ease-out; mix-blend-mode:overlay; }
+        @keyframes rippleAnim{ to{ transform:scale(1); opacity:0; } }
+
+        /* glass panel */
+        .glass-panel{ background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.5); backdrop-filter: blur(8px) saturate(140%); box-shadow: 0 8px 32px rgba(31,41,55,0.08); border-radius:16px; }
+        .dark .glass-panel{ background: rgba(6,10,18,0.45); border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 12px 40px rgba(2,6,23,0.6); }
+
+        /* offcanvas blur backdrop */
+        .backdrop-blur{ position:fixed; left:0; top:0; width:100%; height:100%; z-index:1500; background: rgba(2,6,23,0.35); backdrop-filter: blur(6px); }
+
         /* simple offcanvas/modal */
-        .offcanvas{ position:fixed; left:0; top:0; width:320px; max-width:90%; height:100%; background:var(--card); color:var(--text); box-shadow:var(--material-shadow); transform:translateX(-110%); transition:transform .28s ease; z-index:2000; padding:18px; }
+        .offcanvas{ position:fixed; left:0; top:0; width:320px; max-width:90%; height:100%; background:var(--card); color:var(--text); box-shadow:var(--material-shadow); transform:translateX(-110%); transition:transform .28s ease; z-index:2000; padding:18px; border-radius:0 12px 12px 0; }
         .offcanvas.show{ transform:translateX(0%); }
         .offcanvas h4{ margin-top:0; }
+        .offcanvas .close-btn{ position:absolute; right:10px; top:8px; }
 
         .dark-toggle{ display:inline-flex; align-items:center; gap:8px; }
         .switch{ width:46px; height:26px; background:rgba(15,23,42,0.08); border-radius:999px; position:relative; cursor:pointer; }
@@ -326,11 +353,11 @@ export default function App() {
         .centered-col{ display:flex; flex-direction:column; align-items:center; }
         .form-control[readonly]{ background:transparent; border:1px dashed rgba(0,0,0,0.06); color:var(--text); }
 
-        .material-btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:12px; border:none; cursor:pointer; box-shadow: 0 8px 20px rgba(2,6,23,0.08); transition: transform .12s ease, box-shadow .12s ease, opacity .12s; background: var(--submit-grad); color: white; font-weight:700; }
+        .material-btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:12px; border:none; cursor:pointer; box-shadow: 0 8px 20px rgba(2,6,23,0.08); transition: transform .12s ease, box-shadow .12s ease, opacity .12s; background: var(--submit-grad); color: white; font-weight:700; position:relative; overflow:hidden; }
         .material-btn.outline{ background:transparent; color:var(--text); border:1px solid rgba(15,23,42,0.06); box-shadow:none; }
         .material-btn:active{ transform: translateY(2px) scale(.995); }
 
-        .camera-btn{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background: rgba(2,6,23,0.06); border:none; color:var(--text); }
+        .camera-btn{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background: rgba(2,6,23,0.06); border:none; color:var(--text); position:relative; overflow:hidden; }
 
         .status-row{ display:flex; align-items:center; gap:12px; }
         .muted{ color:var(--muted); }
@@ -356,6 +383,14 @@ export default function App() {
         .star{ position:absolute; width:3px; height:3px; border-radius:50%; background:white; opacity:0.9; animation: twinkle 3s infinite; }
         @keyframes twinkle{ 0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2} }
 
+        /* upload native style (Android-like) */
+        .upload-native{ display:inline-flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.9); box-shadow: 0 6px 14px rgba(2,6,23,0.06); color:var(--text); cursor:pointer; border:1px solid rgba(0,0,0,0.06); }
+        .dark .upload-native{ background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); }
+
+        /* ripple appearance */
+        .ripple{ background: rgba(255,255,255,0.35); }
+        .dark .ripple{ background: rgba(0,0,0,0.25); }
+
         @media (max-width:600px){ h1.title{ font-size:2rem; } .nav-tabs .nav-link{ padding:10px 4px; font-size:14px; } }
       `}</style>
 
@@ -375,7 +410,7 @@ export default function App() {
       <div className="container-mobile">
         <div className="topbar">
           <div className="top-left">
-            <button className="icon-btn" aria-label="About" onClick={() => setShowAbout(true)} title="About">
+            <button className="icon-btn" aria-label="About" onClick={() => setShowAbout(true)} title="About" onMouseDown={addRipple}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.75 7a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12 12.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0112 12.5z" fill="currentColor"/></svg>
             </button>
             <h1 className="title"><span>Handwriting</span><span>Digitiser</span></h1>
@@ -384,18 +419,19 @@ export default function App() {
           <div style={{display:'flex', alignItems:'center', gap:12}}>
             <div className="dark-toggle">
               <label style={{fontSize:12, color:'var(--muted)'}}>Dark</label>
-              <button className="switch" onClick={() => setDark(d=>!d)} aria-pressed={dark} title="Toggle dark">
+              <button className="switch" onClick={() => setDark(d=>!d)} aria-pressed={dark} title="Toggle dark" onMouseDown={addRipple}>
                 <span className="knob" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* About offcanvas */}
+        {/* About offcanvas + backdrop blur*/}
+        {showAbout && <div className="backdrop-blur" onClick={() => setShowAbout(false)} />}
         <div className={`offcanvas ${showAbout ? 'show' : ''}`} role="dialog" aria-modal={showAbout}>
           <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
             <h4>About</h4>
-            <button className="icon-btn" onClick={() => setShowAbout(false)} aria-label="Close">
+            <button className="icon-btn close-btn" onClick={() => setShowAbout(false)} aria-label="Close" onMouseDown={addRipple}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           </div>
@@ -404,17 +440,17 @@ export default function App() {
           <p style={{fontSize:13, color:'var(--muted)'}}>Endpoints used: /ocr/jobs, /ocr/fetch, /ocr/convert, /ocr/pandoc.</p>
         </div>
 
-        <div className="card mb-3">
+        <div className="card mb-3 glass-panel">
           <div className="card-body">
             <ul className="nav nav-tabs mb-3" role="tablist">
               <li className="nav-item">
-                <button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} onClick={() => setActiveTab('input')}>Input</button>
+                <button className={`nav-link ${activeTab === 'input' ? 'active' : ''}`} onClick={() => setActiveTab('input')} onMouseDown={addRipple}>Input</button>
               </li>
               <li className="nav-item">
-                <button className={`nav-link ${activeTab === 'results' ? 'active' : ''}`} onClick={() => setActiveTab('results')}>Results</button>
+                <button className={`nav-link ${activeTab === 'results' ? 'active' : ''}`} onClick={() => setActiveTab('results')} onMouseDown={addRipple}>Results</button>
               </li>
               <li className="nav-item">
-                <button className={`nav-link ${activeTab === 'downloads' ? 'active' : ''}`} onClick={() => setActiveTab('downloads')}>Downloads</button>
+                <button className={`nav-link ${activeTab === 'downloads' ? 'active' : ''}`} onClick={() => setActiveTab('downloads')} onMouseDown={addRipple}>Downloads</button>
               </li>
             </ul>
 
@@ -428,10 +464,14 @@ export default function App() {
                       </label>
 
                       <div style={{display:'flex', gap:12, alignItems:'center'}}>
-                        <input className="form-control" type="file" onChange={(e)=> setFile(e.target.files[0])} />
+                        <input id="fileInput" ref={fileInputRef} className="d-none" type="file" onChange={(e)=> setFile(e.target.files[0])} />
+                        <label htmlFor="fileInput" className="upload-native" onMouseDown={addRipple} style={{display:'inline-flex', alignItems:'center'}}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <span style={{fontWeight:700}}>Upload</span>
+                        </label>
 
                         <input ref={cameraInputRef} style={{display:'none'}} accept="image/*" capture="environment" id="cameraInput" type="file" onChange={(e)=> setFile(e.target.files[0])} />
-                        <button className="camera-btn" onClick={()=> cameraInputRef.current && cameraInputRef.current.click()} aria-label="Capture from camera">
+                        <button className="camera-btn" onClick={()=> cameraInputRef.current && cameraInputRef.current.click()} aria-label="Capture from camera" onMouseDown={addRipple}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 7h-3.2l-1.4-1.8A2 2 0 0013.8 4H10.2a2 2 0 00-1.6.8L7.2 7H4a2 2 0 00-2 2v8a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           Capture
                         </button>
@@ -454,7 +494,7 @@ export default function App() {
                           <select className="form-control" value={model} onChange={(e)=> setModel(e.target.value)} style={{flex:1}}>
                             {models.map(m=> <option key={m} value={m}>{m}</option>)}
                           </select>
-                          <button className="icon-btn" title="Model settings" aria-label="Model settings">
+                          <button className="icon-btn" title="Model settings" aria-label="Model settings" onMouseDown={addRipple}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2h0a2 2 0 01-2-2v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06A2 2 0 014.3 16.9l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2v0a2 2 0 012-2h.09c.66 0 1.24-.4 1.51-1A1.65 1.65 0 006.2 6.6l-.06-.06A2 2 0 018.97 3.7l.06.06c.5.5 1.24.6 1.82.33.66-.3 1.47-.3 2.13 0 .58.27 1.32.17 1.82-.33l.06-.06A2 2 0 0119.7 6.2l-.06.06c-.3.66-.3 1.47 0 2.13.27.58.17 1.32-.33 1.82l-.06.06c-.4.4-.6 1-.6 1.6v.09c0 .66.4 1.24 1 1.51z" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           </button>
                         </div>
@@ -481,15 +521,14 @@ export default function App() {
                     <div style={{height:14}} />
 
                     <div style={{display:'flex', gap:10, width:'100%'}}>
-                      <button className="material-btn" onClick={submitJob} disabled={status === "submitting" || status === "polling"}>
-                        {/* spinner or gear */}
+                      <button className="material-btn" onClick={submitJob} disabled={status === "submitting" || status === "polling"} onMouseDown={addRipple}>
                         {(status && (status === 'submitting' || status.startsWith('pending') || status.startsWith('running') || status === 'fetching-result' || status.startsWith('converting'))) ? (
                           <svg className="spinner-wheel spin" viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 20v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M4.93 4.93l1.41 1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M17.66 17.66l1.41 1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M2 12h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M4.93 19.07l1.41-1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         ) : null}
                         <span>Submit Job</span>
                       </button>
 
-                      <button className="material-btn outline" onClick={() => { setStatus(null); setFile(null); setResults([]); setJobId(null); setPreviewUrl(null); showUserMessage("Reset complete."); }}>
+                      <button className="material-btn outline" onClick={() => { setStatus(null); setFile(null); setResults([]); setJobId(null); setPreviewUrl(null); showUserMessage("Reset complete."); }} onMouseDown={addRipple}>
                         Reset
                       </button>
 
@@ -499,87 +538,4 @@ export default function App() {
                         <div className="status-row">
                           {(status && (status === 'submitting' || status.startsWith('pending') || status.startsWith('running') || status === 'fetching-result' || status.startsWith('converting'))) ? (
                             <div style={{display:'flex',alignItems:'center',gap:8}}>
-                              <svg className="spinner-wheel spin" viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 20v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M4.93 4.93l1.41 1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M17.66 17.66l1.41 1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M2 12h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M4.93 19.07l1.41-1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                              <div style={{textAlign:'right'}}>
-                                <div style={{fontWeight:700, color:'var(--text)'}}>{status}</div>
-                                {jobId && <div style={{fontSize:12, color:'var(--muted)'}}>Job: {jobId}</div>}
-                              </div>
-                            </div>
-                          ) : (
-                            <div>
-                              <div style={{fontWeight:700, color:'var(--muted)'}}>{status ?? 'idle'}</div>
-                              {jobId && <div style={{fontSize:12, color:'var(--muted)'}}>Job: {jobId}</div>}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                    </div>
-
-                  </div>
-                )}
-
-                {activeTab === 'results' && (
-                  <div>
-                    <div className="mb-3">
-                      <h6 style={{ marginBottom: 8, color: 'var(--text)' }}>Current status: <span className="muted">{status ?? 'idle'}</span></h6>
-                      {jobId && (<div style={{ color: 'var(--muted)' }}><strong>JobId:</strong> {jobId}</div>)}
-                    </div>
-
-                    <div className="card result-card">
-                      <div className="card-body">
-                        {results.length === 0 && <div style={{ color: 'var(--muted)' }}>No results yet.</div>}
-                        {results.map((r, idx) => (
-                          <div key={idx} className="mb-3">
-                            <strong style={{ color: 'var(--text)' }}>{r.markdownFilename}</strong>
-                            <div style={{ whiteSpace: "pre-wrap", padding: 8, marginTop: 6, color: 'var(--text)' }}>
-                              <div dangerouslySetInnerHTML={{ __html: r.markdownHtml ?? "<em>Rendering...</em>" }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === 'downloads' && (
-                  <div className="centered-col">
-                    <div className="download-stack" style={{width:'100%'}}>
-                      {results.length === 0 && <div style={{ color: 'var(--muted)' }}>No results to download.</div>}
-                      {results.map((r, idx) => (
-                        <div key={idx} style={{ width: '100%', display:'flex', flexDirection:'column', alignItems:'center', gap: 12 }}>
-                          <div style={{ fontWeight: 700, color: 'var(--text)' }}>{r.markdownFilename}</div>
-                          <div style={{ display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center' }}>
-                            <button className="material-btn outline" onClick={(e) => handleConvert(r, 'html', e)}>HTML</button>
-                            <button className="material-btn outline" onClick={(e) => handleConvert(r, 'docx', e)}>DOCX</button>
-                            <button className="material-btn outline" onClick={(e) => handleConvert(r, 'pdf', e)}>PDF</button>
-                            {isTopLevelTable(r.markdownHtml) && (<button className="material-btn outline" onClick={(e) => handleConvert(r, 'xlsx', e)}>XLSX</button>)}
-                            <button className="material-btn" onClick={() => handleDownloadMarkdown(r)}>Markdown</button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* fireworks overlay */}
-        {showFireworks && (
-          <div className="fireworks-wrap">
-            {Array.from({length:12}).map((_,i)=>{
-              const left = Math.random()*100; const top = Math.random()*60 + 10; const clr = ['#f97316','#fb7185','#60a5fa','#34d399','#f43f5e','#e879f9'][Math.floor(Math.random()*6)]; const delay = Math.random()*0.8; const duration = 1 + Math.random()*1.2; const style = { left:`${left}%`, top:`${top}%`, background:clr, animation:`fw ${duration}s ${delay}s ease-out forwards` };
-              return <span key={i} className="firework" style={style} />;
-            })}
-            <style>{`@keyframes fw{ 0%{ opacity:1; transform:scale(0);} 60%{ opacity:1; transform:scale(1.6);} 100%{ opacity:0; transform:scale(2.6) translateY(-60px);} }`}</style>
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
-}
+                              <svg className="spinner-wheel spin" viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 20v2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M4.93 4.93l1.41 1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M17.66 17.66l1.41 1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M2 12h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 12h2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M4.93 19.07l1.41-1.41" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/><path d="M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="1.6`,
