@@ -8,7 +8,7 @@ echo "Build finished at ./build"
 
 mkdir templates
 
-mv ./build/index.html templates/
+cp ./build/index.html templates/
 sed -i 's|\./static|/static|g' templates/index.html
 
 cp -r ./build/static .
