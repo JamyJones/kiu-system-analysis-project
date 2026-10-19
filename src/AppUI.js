@@ -225,7 +225,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
         <div style={{ display: 'flex', justifyContent: 'center', margin: '100px 0 30px' }}>
           <div className="status-row" style={{ padding: '8px 12px', borderRadius: 12, background: 'var(--card)', boxShadow: '0 6px 18px rgba(2,6,23,0.06)' }}>
               <DotLottieReact
-                src={processing?"https://lottie.host/c7afde75-9220-4a2c-b72e-eb299ccae7a9/l3YHcUMIuv.lottie":"https://lottie.host/7c767a57-299c-47e8-a8bd-07ddff508490/lOCk4SAhXW.lottie"}
+                src={processing?"https://lottie.host/a4f062d9-4305-4bc6-9063-13f0708a3898/s55Tns40Ns.lottie":"https://lottie.host/7c767a57-299c-47e8-a8bd-07ddff508490/lOCk4SAhXW.lottie"}
                 loop
                 autoplay
               />
