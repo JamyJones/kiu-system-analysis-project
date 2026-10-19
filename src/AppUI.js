@@ -134,6 +134,12 @@ h1.title span{ display:block }
 
 .tab-panel{ padding:12px; display:flex; justify-content:center }
 .tab-inner{ width:100%; max-width:680px }
+.download-stack { display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; }
+        .download-btn { min-width: 220px; border-radius: 12px; transition: transform .18s ease, box-shadow .18s ease; }
+        .download-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08); }
+        .download-btn:active { transform: scale(.98); }
+        .shake { animation: shake 0.4s; }
+        @keyframes shake { 0%{ transform: translateX(0);} 25%{ transform: translateX(-6px);} 50%{ transform: translateX(6px);} 75%{ transform: translateX(-4px);} 100%{ transform: translateX(0);} }
 
 label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; color:var(--text); }
 .upload-icon{ width:18px; height:18px }
@@ -310,17 +316,37 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
                   </div>
                 )}
 
-                {activeTab === 'downloads' && (
-                  <div className="centered-col"><div className="download-stack" style={{ width: '100%' }}>{results.length === 0 ? <div style={{ color: 'var(--muted)' }}>No results to download.</div> : results.map((r, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
-                      <div style={{ flex: 1 }}>{r.summary ?? r.text}</div>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button className="material-btn outline" onClick={() => handleDownloadMarkdown && handleDownloadMarkdown(r)}>Download MD</button>
-                        <button className="material-btn outline" onClick={() => handleConvert && handleConvert(r)}>Convert</button>
+               {activeTab === 'downloads' && (
+                <div className="centered" style={{ padding: 18 }}>
+                  <div className="download-stack">
+                    {results.length === 0 && <div style={{ color: '#475569' }}>No results to download.</div>}
+                    {results.map((r, idx) => (
+                      <div key={idx} style={{ width: '100%', display:'flex', flexDirection:'column', alignItems:'center', gap: 12 }}>
+                        <div style={{ fontWeight: 600, color: '#0f172a' }}>{r.markdownFilename}</div>
+                        <div className="d-flex flex-column align-items-center" style={{ width: '100%', gap: 10 }}>
+                          <button className="btn btn-outline-primary download-btn" onClick={(e) => handleConvert(r, 'html', e)}>
+                            Download HTML
+                          </button>
+                          <button className="btn btn-outline-secondary download-btn" onClick={(e) => handleConvert(r, 'docx', e)}>
+                            Download DOCX
+                          </button>
+                          <button className="btn btn-outline-danger download-btn" onClick={(e) => handleConvert(r, 'pdf', e)}>
+                            Download PDF
+                          </button>
+                          {isTopLevelTable(r.markdownHtml) && (
+                            <button className="btn btn-outline-warning download-btn" onClick={(e) => handleConvert(r, 'xlsx', e)}>
+                              Download Excel
+                            </button>
+                          )}
+                          <button className="btn btn-outline-success download-btn" onClick={() => handleDownloadMarkdown(r)}>
+                            Download Markdown
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}</div></div>
-                )}
+                    ))}
+                  </div>
+                </div>
+              )}
               </div>
             </div>
           </div>
