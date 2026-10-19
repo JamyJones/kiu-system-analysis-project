@@ -25,7 +25,6 @@ def render_to_html(req_or_md):
         md = req_or_md or ""
 
     # run run_pandoc.sh html and feed md via stdin
-    print(md)
     res = subprocess.run(
         ["./run_pandoc.sh", "html"],
         input=md,
@@ -46,7 +45,7 @@ def convert_md(req):
     """
     try:
         data = req.get_json() or {}
-        md = data.get("mdText", "")
+        md = data.get("mdText", "")['text']
         fmt = (data.get("format") or "html").lower().strip()
 
         if fmt == "html":

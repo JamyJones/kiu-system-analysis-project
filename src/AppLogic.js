@@ -115,7 +115,7 @@ export default function useAppLogic(){
 
   function isTopLevelTable(html){ if(!html) return false; return (/^\s*<table\b/i).test(html.trim()); }
 
-  async function handleConvert(item, format){ try{ setStatus(`converting: ${format}`); const body = { mdText: item.markdownText, format }; const resp = await fetch(`${ROUTE_BASE}/convert`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }); if(!resp.ok){ const t = await resp.text(); showUserMessage(`Convert failed: ${resp.status} ${t}`); setStatus(null); return; } const blob = await resp.blob(); const ext = format==='docx'?'docx': format==='html'?'html':'pdf'; downloadBlob(blob, `${item.markdownFilename.replace(/\.md$/,'')}.${ext}`); setStatus(null); }catch(e){ log('Convert error: '+e.message); showUserMessage('Convert error'); setStatus(null); } }
+  async function handleConvert(item, format){ try{ setStatus(`converting: ${format}`); const body = { mdText: item.markdownText['text'], format }; const resp = await fetch(`${ROUTE_BASE}/convert`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }); if(!resp.ok){ const t = await resp.text(); showUserMessage(`Convert failed: ${resp.status} ${t}`); setStatus(null); return; } const blob = await resp.blob(); const ext = format==='docx'?'docx': format==='html'?'html':'pdf'; downloadBlob(blob, `${item.markdownFilename.replace(/\.md$/,'')}.${ext}`); setStatus(null); }catch(e){ log('Convert error: '+e.message); showUserMessage('Convert error'); setStatus(null); } }
 
   const models = ['PaddleOCR-VL-1.6','PaddleOCR-Card-1.0','PaddleOCR-Table-1.2'];
 
