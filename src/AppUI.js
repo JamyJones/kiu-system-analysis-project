@@ -105,7 +105,7 @@ export default function AppUI({ logic }){
 h1.title{ text-align:center; font-family: 'Segoe Script', 'Bradley Hand', cursive, serif; font-size:3rem; line-height:0.95; margin:8px 0 16px; font-weight:900; }
 h1.title span{ display:block }
 
-.topbar{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:8px; }
+.topbar{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-bottom:6px; }
 .top-left, .top-right { display:flex; align-items:center; }
 .top-right { justify-content:flex-end; }
 .icon-btn{ background:transparent; border:0; color:var(--text); padding:8px; border-radius:10px; cursor:pointer; position:relative; overflow:hidden; }
@@ -115,13 +115,13 @@ h1.title span{ display:block }
 .dark .ripple{ background:rgba(255,255,255,0.12); }
 @keyframes rippleAnim{ to{ transform:scale(1); opacity:0; } }
 
-.glass-panel{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.46)); border-radius:16px; border:1px solid rgba(255,255,255,0.6); box-shadow:0 10px 30px rgba(16,24,40,0.08); }
+.glass-panel{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.46)); border-radius:16px; border:1px solid rgba(255,255,255,0.6); box-shadow:0 10px 30px rgba(16,24,40,[...] }
 .dark .glass-panel{ background: linear-gradient(180deg, rgba(10,20,30,0.6), rgba(8,12,20,0.46)); border:1px solid rgba(255,255,255,0.04); box-shadow:0 14px 40px rgba(2,6,23,0.6); }
 
 .backdrop-blur{ position:fixed; inset:0; z-index:1600; background:rgba(2,6,23,0.35); backdrop-filter:blur(6px); }
-.offcanvas{ position:fixed; left:0; top:0; width:320px; max-width:92%; height:100%; background:var(--card); color:var(--text); box-shadow:0 12px 40px rgba(2,6,23,0.12); transform:translateX(-112%); }
+.offcanvas{ position:fixed; left:0; top:0; width:320px; max-width:92%; height:100%; background:var(--card); color:var(--text); box-shadow:0 12px 40px rgba(2,6,23,0.12); transform:translateX(-112%[...]
 .offcanvas.show{ transform:translateX(0%); }
-.offcanvas-right{ position:fixed; right:12px; top:80px; width:min(330px, calc(100vw - 24px)); background:var(--card); box-shadow:0 14px 36px rgba(0,0,0,0.18); border-radius:12px; padding:12px; z-index:2100; }
+.offcanvas-right{ position:fixed; right:12px; top:80px; width:min(330px, calc(100vw - 24px)); background:var(--card); box-shadow:0 14px 36px rgba(0,0,0,0.18); border-radius:12px; padding:12px; z-[...]
 .offcanvas-right.show{ display:block; }
 
 .nav-tabs{ display:flex; gap:10px; padding:8px; background:transparent; border-bottom:none; }
@@ -137,11 +137,11 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
 .centered-col{ display:flex; flex-direction:column; align-items:center }
 .form-control[readonly]{ background:transparent; border:1px dashed rgba(0,0,0,0.06); color:var(--text) }
 
-.material-btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:12px 18px; border-radius:12px; border:none; cursor:pointer; color:white; background:var(--submit-grad); }
+.material-btn{ display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:12px 18px; border-radius:12px; border:none; cursor:pointer; color:white; background:var(--submit-[...]
 .material-btn.outline{ background:transparent; color:var(--text); border:1px solid rgba(15,23,42,0.06); box-shadow:none }
 .material-btn:active{ transform:translateY(2px) scale(.995) }
 
-.camera-btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; background:rgba(2,6,23,0.06); border:none; color:var(--text); position:relative; overflow:hidden }
+.camera-btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 12px; border-radius:10px; background:rgba(2,6,23,0.06); border:none; color:var(--text); position:relative; overflow:hid[...]
 
 .status-row{ display:flex; align-items:center; gap:12px }
 .muted{ color:var(--muted) }
@@ -161,7 +161,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
 .star{ position:absolute; width:3px; height:3px; border-radius:50%; background:white; opacity:0.9; animation: twinkle 3s infinite }
 @keyframes twinkle{ 0%{opacity:0.2}50%{opacity:1}100%{opacity:0.2} }
 
-.upload-native{ display:inline-flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.9); box-shadow:0 6px 14px rgba(2,6,23,0.06); color:var(--text); }
+.upload-native{ display:inline-flex; align-items:center; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,0.9); box-shadow:0 6px 14px rgba(2,6,23,0.06); color:var(--te[...]
 .dark .upload-native{ background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04) }
 
 @media (max-width:640px){ h1.title{ font-size:2.1rem } .nav-tabs .nav-link{ padding:10px 6px; font-size:14px } }
@@ -215,13 +215,13 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
               <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
-          <p style={{ color: 'var(--muted)' }}>This UI submits images or documents to an OCR backend. Capture from camera on mobile, or upload files. After processing you can download results as Markdown or other formats.</p>
+          <p style={{ color: 'var(--muted)' }}>This UI submits images or documents to an OCR backend. Capture from camera on mobile, or upload files. After processing you can download results as Markd[...]
           <hr />
           <p style={{ fontSize: 13, color: 'var(--muted)' }}>Endpoints: /ocr/jobs, /ocr/fetch, /ocr/convert, /ocr/pandoc</p>
         </div>
 
         {/* Status banner placed between the topbar and the main glass card */}
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '6px 0' }}>
           <div className="status-row" style={{ padding: '8px 12px', borderRadius: 12, background: 'var(--card)', boxShadow: '0 6px 18px rgba(2,6,23,0.06)' }}>
             <div className="spinner-wheel" aria-hidden>
               <FontAwesomeIcon icon={faGear} className={processing ? 'spin' : ''} />
@@ -256,7 +256,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
                         </label>
 
                         <input ref={cameraInputRef} style={{ display: 'none' }} accept="image/*" capture="environment" id="cameraInput" type="file" onChange={(e) => setFile && setFile(e.target.files[0])} />
-                        <button className="camera-btn" onClick={() => cameraInputRef.current && cameraInputRef.current.click()} onMouseDown={addRipple} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        <button className="camera-btn" onClick={() => cameraInputRef.current && cameraInputRef.current.click()} onMouseDown={addRipple} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                           <FontAwesomeIcon icon={faCamera} />
                           Capture
                         </button>
@@ -269,15 +269,19 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
 
                     <div style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center' }}>
                       <div style={{ flex: 1 }}>
-                        <label className="form-label">Model</label>
-                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <button className="icon-btn" title="Model settings" onClick={() => setShowModelSettings((s) => !s)} onMouseDown={addRipple} aria-label="Model settings">
+                            <FontAwesomeIcon icon={faGear} />
+                          </button>
+                          <label className="form-label" style={{ margin: 0 }}>Model</label>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
                           <select className="form-control" value={model} onChange={(e) => setModel && setModel(e.target.value)} style={{ flex: 1 }}>
                             {models.map((m) => <option key={m} value={m}>{m}</option>)}
                           </select>
-                          <button className="icon-btn" title="Model settings" onClick={() => setShowModelSettings((s) => !s)} onMouseDown={addRipple}>
-                            <FontAwesomeIcon icon={faGear} />
-                          </button>
                         </div>
+
                       </div>
                     </div>
 
@@ -299,12 +303,20 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
                 {activeTab === 'results' && (
                   <div>
                     <div style={{ marginBottom: 8 }}><h6 style={{ marginBottom: 6, color: 'var(--text)' }}>Current status: <span style={{ color: 'var(--muted)' }}>{status ?? 'idle'}</span></h6>{jobId && <div style={{ fontSize: 12, color: 'var(--muted)' }}>Job: {jobId}</div>}</div>
-                    <div className="card result-card"><div className="card-body">{results.length === 0 ? <div style={{ color: 'var(--muted)' }}>No results yet.</div> : results.map((r, i) => (<div key={i}>{/* result item */}</div>))}</div></div>
+                    <div className="card result-card"><div className="card-body">{results.length === 0 ? <div style={{ color: 'var(--muted)' }}>No results yet.</div> : results.map((r, i) => (<div key={i} style={{ marginBottom: 8 }}><pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{r.text}</pre></div>))}</div></div>
                   </div>
                 )}
 
                 {activeTab === 'downloads' && (
-                  <div className="centered-col"><div className="download-stack" style={{ width: '100%' }}>{results.length === 0 ? <div style={{ color: 'var(--muted)' }}>No results to download.</div> : results.map((r, i) => (<div key={i} className="file-chip">Download {i}</div>))}</div></div>
+                  <div className="centered-col"><div className="download-stack" style={{ width: '100%' }}>{results.length === 0 ? <div style={{ color: 'var(--muted)' }}>No results to download.</div> : results.map((r, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                      <div style={{ flex: 1 }}>{r.summary ?? r.text.slice(0, 120)}</div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button className="material-btn outline" onClick={() => handleDownloadMarkdown && handleDownloadMarkdown(r)}>Download MD</button>
+                        <button className="material-btn outline" onClick={() => handleConvert && handleConvert(r)}>Convert</button>
+                      </div>
+                    </div>
+                  ))}</div></div>
                 )}
               </div>
             </div>
@@ -321,9 +333,9 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
           </div>
 
           <div>
-            <div className="form-check"><input className="form-check-input" id="orient" type="checkbox" checked={useDocOrientationClassify} onChange={(e) => setUseDocOrientationClassify && setUseDocOrientationClassify(e.target.checked)} /> <label htmlFor="orient">Document orientation classification</label></div>
-            <div className="form-check"><input className="form-check-input" id="unwarp" type="checkbox" checked={useDocUnwarping} onChange={(e) => setUseDocUnwarping && setUseDocUnwarping(e.target.checked)} /> <label htmlFor="unwarp">Document unwarping</label></div>
-            <div className="form-check"><input className="form-check-input" id="chart" type="checkbox" checked={useChartRecognition} onChange={(e) => setUseChartRecognition && setUseChartRecognition(e.target.checked)} /> <label htmlFor="chart">Chart recognition</label></div>
+            <div className="form-check"><input className="form-check-input" id="orient" type="checkbox" checked={useDocOrientationClassify} onChange={(e) => setUseDocOrientationClassify && setUseDocOrientationClassify(e.target.checked)} /> <label className="form-check-label" htmlFor="orient">Document orientation classification</label></div>
+            <div className="form-check"><input className="form-check-input" id="unwarp" type="checkbox" checked={useDocUnwarping} onChange={(e) => setUseDocUnwarping && setUseDocUnwarping(e.target.checked)} /> <label className="form-check-label" htmlFor="unwarp">Document unwarping</label></div>
+            <div className="form-check"><input className="form-check-input" id="chart" type="checkbox" checked={useChartRecognition} onChange={(e) => setUseChartRecognition && setUseChartRecognition(e.target.checked)} /> <label className="form-check-label" htmlFor="chart">Chart recognition</label></div>
           </div>
         </div>
 
