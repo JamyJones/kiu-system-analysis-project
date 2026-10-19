@@ -25,6 +25,7 @@ def render_to_html(req_or_md):
         md = req_or_md or ""
 
     # run run_pandoc.sh html and feed md via stdin
+    print(md)
     res = subprocess.run(
         ["./run_pandoc.sh", "html"],
         input=md,

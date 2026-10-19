@@ -313,7 +313,7 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
                 {activeTab === 'downloads' && (
                   <div className="centered-col"><div className="download-stack" style={{ width: '100%' }}>{results.length === 0 ? <div style={{ color: 'var(--muted)' }}>No results to download.</div> : results.map((r, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
-                      <div style={{ flex: 1 }}>{r.summary ?? r.text.slice(0, 120)}</div>
+                      <div style={{ flex: 1 }}>{r.summary ?? r.text}</div>
                       <div style={{ display: 'flex', gap: 8 }}>
                         <button className="material-btn outline" onClick={() => handleDownloadMarkdown && handleDownloadMarkdown(r)}>Download MD</button>
                         <button className="material-btn outline" onClick={() => handleConvert && handleConvert(r)}>Convert</button>
