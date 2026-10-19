@@ -310,10 +310,22 @@ label.form-label{ display:flex; align-items:center; gap:10px; font-weight:800; c
                 )}
 
                 {activeTab === 'results' && (
-                  <div>
-                    <div style={{ marginBottom: 8 }}><h6 style={{ marginBottom: 6, color: 'var(--text)' }}>Current status: <span style={{ color: 'var(--muted)' }}>{status ?? 'idle'}</span></h6>{jobId && <div style={{ fontSize: 12, color: 'var(--muted)' }}>Job: {jobId}</div>}</div>
-                    <div className="card result-card"><div className="card-body">{results.length === 0 ? <div style={{ color: 'var(--muted)' }}>No results yet.</div> : results.map((r, i) => (<div key={i} style={{ marginBottom: 8 }}><pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{r.text}</pre></div>))}</div></div>
+<div className="p-3 centered">
+            <h5 style={{ color: '#0f172a' }}>Results preview</h5>
+            <div className="card mb-3">
+              <div className="card-body" style={{ maxHeight: 200, overflow: "auto", color: '#1f2937' }}>
+                {results.length === 0 && <div style={{ color: '#475569' }}>No results yet.</div>}
+                {results.map((r, idx) => (
+                  <div key={idx} className="mb-3">
+                    <strong>{r.markdownFilename}</strong>
+                    <div style={{ whiteSpace: "pre-wrap", padding: 8, marginTop: 6 }}>
+                      <div dangerouslySetInnerHTML={{ __html: r.markdownHtml ?? "<em>Rendering...</em>" }} />
+                    </div>
                   </div>
+                ))}
+              </div>
+            </div>
+          </div>
                 )}
 
                {activeTab === 'downloads' && (
