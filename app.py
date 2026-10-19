@@ -11,6 +11,7 @@ from utils.ocr import submit_job, job_status, fetch_url
 
 # updated pandoc utilities
 from utils.pandoc import render_to_html, convert_md
+import requests
 
 app = Flask(__name__)
 CORS(app)
