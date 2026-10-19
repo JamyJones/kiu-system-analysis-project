@@ -20,7 +20,7 @@ def render_to_html(req_or_md):
     """
     if hasattr(req_or_md, "get_json"):
         data = req_or_md.get_json() or {}
-        md = data.get("mdText", "")
+        md = data.get("mdText", "")['text']
     else:
         md = req_or_md or ""
 
